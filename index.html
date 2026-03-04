@@ -603,7 +603,7 @@
                 ctx.fillText(balls[0].type + ' WINS!', canvas.width / 2, canvas.height / 2 - 40);
                 ctx.fillStyle = balls[0].color;
                 ctx.font = 'bold 30px Arial';
-                ctx.fillText(balls[0].health + ' HP LEFT', canvas.width / 2, canvas.height / 2 + 30);
+                ctx.fillText(Math.floor(balls[0].health) + ' HP LEFT', canvas.width / 2, canvas.height / 2 + 30);
             } else {
                 ctx.fillText('DOUBLE KO!', canvas.width / 2, canvas.height / 2);
             }
@@ -623,5 +623,6 @@
 </body>
 
 </html>
+
 
 
