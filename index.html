@@ -162,14 +162,18 @@
 <button id="restartBtn" onclick="location.reload()">Reset Game</button>
 
 <script>
-    const weaponStats = {
-        'Sword': { color: '#fce883', hp: 100, radius: 35, speed: 4, src: 'sword.png' },
-        'Spear': { color: '#5dd1b2', hp: 80, radius: 25, speed: 6, src: 'spear.png' },
-        'Axe':   { color: '#e67e22', hp: 150, radius: 45, speed: 2.5, src: 'axe.png' }
+    const stats = {
+        'Sword': { c: '#fce883', hp: 100, r: 35, s: 4, len: 60, dmg: 1 },
+        'Spear': { c: '#5dd1b2', hp: 80, r: 25, s: 6, len: 80, dmg: 1.5 },
+        'Axe':   { c: '#e67e22', hp: 150, r: 45, s: 2.5, len: 50, dmg: 2 }
     };
 
     let player1Choice = null;
     let player2Choice = null;
+    let balls = [];
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const hitSound = new Audio('clash.mp3');
 
     function selectWeapon(type) {
         const cards = document.querySelectorAll('.weapon-card');
@@ -208,420 +212,156 @@
         document.getElementById('startBtn').classList.remove('ready');
     }
 
-    const hitSound = new Audio('clash.mp3');
-
-    function playHitSound() {
-        let soundClone = hitSound.cloneNode();
-        soundClone.volume = 0.6;
-        soundClone.play().catch(e => console.log(e));
+    function triggerShake() {
+        canvas.classList.remove('shake');
+        void canvas.offsetWidth;
+        canvas.classList.add('shake');
     }
 
-    function triggerShake() {
-        const canvasEl = document.getElementById('gameCanvas');
-        canvasEl.classList.remove('shake');
-        void canvasEl.offsetWidth;
-        canvasEl.classList.add('shake');
+    class Ball {
+        constructor(type, num) {
+            let st = stats[type];
+            Object.assign(this, st);
+            this.type = type;
+            this.x = num === 1 ? 150 : 450;
+            this.y = 300;
+            this.dx = num === 1 ? this.s : -this.s;
+            this.dy = Math.random() * 4 - 2;
+            this.a = 0;
+            this.spin = Math.random() * 0.05 + 0.05;
+            this.inv = 0;
+        }
+
+        update() {
+            if (this.x + this.r > 600 || this.x - this.r < 0) this.dx *= -1;
+            if (this.y + this.r > 600 || this.y - this.r < 0) this.dy *= -1;
+            this.x += this.dx;
+            this.y += this.dy;
+            this.a += this.spin;
+            if (this.inv > 0) this.inv--;
+
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fillStyle = (this.inv > 0 && Math.floor(Date.now() / 100) % 2 === 0) ? '#fff' : this.c;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.a);
+            ctx.fillStyle = '#333';
+            ctx.fillRect(this.r, -8, this.len, 16);
+            ctx.strokeRect(this.r, -8, this.len, 16);
+            ctx.restore();
+        }
     }
 
     function startGame() {
         if (!player1Choice || !player2Choice) return;
         document.getElementById('menu').style.display = 'none';
-        document.getElementById('gameCanvas').style.display = 'block';
+        canvas.style.display = 'block';
         document.getElementById('restartBtn').style.display = 'block';
+        
+        balls.push(new Ball(player1Choice, 1));
+        balls.push(new Ball(player2Choice, 2));
         
         hitSound.play().then(() => {
             hitSound.pause();
             hitSound.currentTime = 0;
         }).catch(e => console.log(e));
 
-        createBall(player1Choice, 1);
-        createBall(player2Choice, 2);
         animate();
     }
 
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    let isPaused = false;
-    let balls = []; 
-    let particles = [];
-    let p1Ball = null;
-    let p2Ball = null;
+    function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    window.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.shiftKey) {
-            isPaused = !isPaused;
-        }
-    });
-
-    class Particle {
-        constructor(x, y, dx, dy, color) {
-            this.x = x;
-            this.y = y;
-            this.radius = Math.random() * 4 + 1;
-            this.dx = dx;
-            this.dy = dy;
-            this.color = color;
-            this.alpha = 1;
-        }
-        draw() {
-            ctx.save();
-            ctx.globalAlpha = this.alpha;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-            ctx.restore();
-        }
-        update() {
-            this.x += this.dx;
-            this.y += this.dy;
-            this.alpha -= 0.04;
-        }
-    }
-
-    function spawnParticles(x, y, color) {
-        for (let k = 0; k < 15; k++) {
-            const pDx = (Math.random() - 0.5) * 10;
-            const pDy = (Math.random() - 0.5) * 10;
-            particles.push(new Particle(x, y, pDx, pDy, color));
-        }
-    }
-
-    class Ball {
-        constructor(x, y, radius, dx, dy, color, health, type, src) {
-            this.x = x;
-            this.y = y;
-            this.radius = radius;
-            this.dx = dx;
-            this.dy = dy;
-            this.mass = radius;
-            this.color = color;
-            this.health = health;
-            this.type = type;
-            this.img = new Image();
-            this.img.src = src;
-            this.angle = 0;
-            this.spinSpeed = (Math.random() * 0.05) + 0.05;
-            this.wLength = radius * 2.5;
-            this.wWidth = radius * 0.6;
-            this.iframes = 0;
-            this.damage = 1;
-            this.weaponCooldown = 0;
-        }
-
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = (this.iframes > 0 && Math.floor(Date.now() / 100) % 2 === 0) ? '#fff' : this.color;
-            ctx.fill();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#000';
-            ctx.stroke();
-            ctx.closePath();
-
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.angle);
-
-            const drawOffset = this.radius + 5;
-
-            if (this.img.complete && this.img.naturalWidth !== 0) {
-                ctx.drawImage(this.img, drawOffset, -this.wWidth / 2, this.wLength, this.wWidth);
+        if (balls.length < 2) {
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 50px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            if (balls.length === 1) {
+                ctx.fillText(balls[0].type + ' WINS!', 300, 260);
+                ctx.fillStyle = balls[0].c;
+                ctx.font = 'bold 30px Arial';
+                ctx.fillText(Math.floor(balls[0].hp) + ' HP LEFT', 300, 320);
             } else {
-                ctx.fillStyle = '#333';
-                ctx.fillRect(drawOffset, -this.wWidth / 2, this.wLength, this.wWidth);
-                ctx.strokeStyle = '#000';
-                ctx.strokeRect(drawOffset, -this.wWidth / 2, this.wLength, this.wWidth);
+                ctx.fillText('DOUBLE KO!', 300, 300);
             }
-            ctx.restore();
+            return;
         }
 
-        update() {
-            if (this.x + this.radius > canvas.width) {
-                this.x = canvas.width - this.radius;
-                this.dx = -this.dx;
-            } else if (this.x - this.radius < 0) {
-                this.x = this.radius;
-                this.dx = -this.dx;
-            }
+        const b1 = balls[0];
+        const b2 = balls[1];
+        const dx = b2.x - b1.x;
+        const dy = b2.y - b1.y;
+        const dist = Math.hypot(dx, dy);
 
-            if (this.y + this.radius > canvas.height) {
-                this.y = canvas.height - this.radius;
-                this.dy = -this.dy;
-            } else if (this.y - this.radius < 0) {
-                this.y = this.radius;
-                this.dy = -this.dy;
-            }
-
-            this.x += this.dx;
-            this.y += this.dy;
-            this.angle += this.spinSpeed;
-
-            if (this.iframes > 0) this.iframes--;
-            if (this.weaponCooldown > 0) this.weaponCooldown--;
-        }
-    }
-
-    function createBall(type, playerNum) {
-        const stats = weaponStats[type];
-        let x = (playerNum === 1) ? 150 : 450;
-        let y = 300;
-        let dx = (playerNum === 1) ? stats.speed : -stats.speed;
-        let dy = (Math.random() * 4) - 2; 
-
-        let newBall = new Ball(x, y, stats.radius, dx, dy, stats.color, stats.hp, type, stats.src);
-        balls.push(newBall);
-        
-        if (playerNum === 1) p1Ball = newBall;
-        if (playerNum === 2) p2Ball = newBall;
-    }
-
-    function rotate(dx, dy, angle) {
-        return {
-            x: dx * Math.cos(angle) - dy * Math.sin(angle),
-            y: dx * Math.sin(angle) + dy * Math.cos(angle)
-        };
-    }
-
-    function resolveCollision(ball1, ball2) {
-        const xVelocityDiff = ball1.dx - ball2.dx;
-        const yVelocityDiff = ball1.dy - ball2.dy;
-        const xDist = ball2.x - ball1.x;
-        const yDist = ball2.y - ball1.y;
-
-        if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
-            const angle = -Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
-            const m1 = ball1.mass;
-            const m2 = ball2.mass;
-
-            const u1 = rotate(ball1.dx, ball1.dy, angle);
-            const u2 = rotate(ball2.dx, ball2.dy, angle);
-
-            const v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y };
-            const v2 = { x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m1 / (m1 + m2), y: u2.y };
-
-            const vFinal1 = rotate(v1.x, v1.y, -angle);
-            const vFinal2 = rotate(v2.x, v2.y, -angle);
-
-            ball1.dx = vFinal1.x;
-            ball1.dy = vFinal1.y;
-            ball2.dx = vFinal2.x;
-            ball2.dy = vFinal2.y;
-        }
-    }
-
-    function checkWeaponHit(attacker, defender) {
-        if (defender.iframes > 0) return false;
-
-        const orbitDist = attacker.radius + 5 + attacker.wLength / 2;
-        const wx = attacker.x + Math.cos(attacker.angle) * orbitDist;
-        const wy = attacker.y + Math.sin(attacker.angle) * orbitDist;
-
-        const dx = defender.x - wx;
-        const dy = defender.y - wy;
-
-        const localX = dx * Math.cos(-attacker.angle) - dy * Math.sin(-attacker.angle);
-        const localY = dx * Math.sin(-attacker.angle) + dy * Math.cos(-attacker.angle);
-
-        const halfW = attacker.wLength / 2;
-        const halfH = attacker.wWidth / 2;
-
-        let closestX = localX;
-        let closestY = localY;
-
-        if (closestX < -halfW) closestX = -halfW;
-        else if (closestX > halfW) closestX = halfW;
-
-        if (closestY < -halfH) closestY = -halfH;
-        else if (closestY > halfH) closestY = halfH;
-
-        const distX = localX - closestX;
-        const distY = localY - closestY;
-
-        return (distX * distX) + (distY * distY) < (defender.radius * defender.radius);
-    }
-
-    function getWeaponCorners(b) {
-        const orbitDist = b.radius + 5 + b.wLength / 2;
-        const cx = b.x + Math.cos(b.angle) * orbitDist;
-        const cy = b.y + Math.sin(b.angle) * orbitDist;
-        const hw = b.wLength / 2;
-        const hh = b.wWidth / 2;
-        const cosA = Math.cos(b.angle);
-        const sinA = Math.sin(b.angle);
-
-        return [
-            { x: cx + hw*cosA - hh*sinA, y: cy + hw*sinA + hh*cosA },
-            { x: cx + hw*cosA - (-hh)*sinA, y: cy + hw*sinA + (-hh)*cosA },
-            { x: cx + (-hw)*cosA - (-hh)*sinA, y: cy + (-hw)*sinA + (-hh)*cosA },
-            { x: cx + (-hw)*cosA - hh*sinA, y: cy + (-hw)*sinA + hh*cosA }
-        ];
-    }
-
-    function doPolygonsIntersect(a, b) {
-        const polygons = [a, b];
-        for (let i = 0; i < polygons.length; i++) {
-            const polygon = polygons[i];
-            for (let i1 = 0; i1 < polygon.length; i1++) {
-                const i2 = (i1 + 1) % polygon.length;
-                const p1 = polygon[i1];
-                const p2 = polygon[i2];
-                const normal = { x: p2.y - p1.y, y: p1.x - p2.x };
-
-                let minA = undefined, maxA = undefined;
-                for (let j = 0; j < a.length; j++) {
-                    const projected = normal.x * a[j].x + normal.y * a[j].y;
-                    if (minA === undefined || projected < minA) minA = projected;
-                    if (maxA === undefined || projected > maxA) maxA = projected;
-                }
-
-                let minB = undefined, maxB = undefined;
-                for (let j = 0; j < b.length; j++) {
-                    const projected = normal.x * b[j].x + normal.y * b[j].y;
-                    if (minB === undefined || projected < minB) minB = projected;
-                    if (maxB === undefined || projected > maxB) maxB = projected;
-                }
-
-                if (maxA < minB || maxB < minA) return false;
-            }
-        }
-        return true;
-    }
-
-    function checkWeaponVsWeapon(b1, b2) {
-        if (b1.weaponCooldown > 0 || b2.weaponCooldown > 0) return false;
-        const poly1 = getWeaponCorners(b1);
-        const poly2 = getWeaponCorners(b2);
-        return doPolygonsIntersect(poly1, poly2);
-    }
-
-    function checkCollisions() {
-        for (let i = 0; i < balls.length; i++) {
-            for (let j = i + 1; j < balls.length; j++) {
-                const dx = balls[i].x - balls[j].x;
-                const dy = balls[i].y - balls[j].y;
-                const distance = Math.hypot(dx, dy);
-
-                if (distance < balls[i].radius + balls[j].radius) {
-                    resolveCollision(balls[i], balls[j]);
-                }
-            }
-        }
-
-        for (let i = 0; i < balls.length; i++) {
-            for (let j = i + 1; j < balls.length; j++) {
-                if (checkWeaponVsWeapon(balls[i], balls[j])) {
-                    balls[i].spinSpeed *= -1;
-                    balls[j].spinSpeed *= -1;
-                    balls[i].weaponCooldown = 15;
-                    balls[j].weaponCooldown = 15;
-                    
-                    playHitSound();
-                    triggerShake();
-                    
-                    const orbitDist1 = balls[i].radius + 5 + balls[i].wLength / 2;
-                    const wx1 = balls[i].x + Math.cos(balls[i].angle) * orbitDist1;
-                    const wy1 = balls[i].y + Math.sin(balls[i].angle) * orbitDist1;
-                    
-                    const orbitDist2 = balls[j].radius + 5 + balls[j].wLength / 2;
-                    const wx2 = balls[j].x + Math.cos(balls[j].angle) * orbitDist2;
-                    const wy2 = balls[j].y + Math.sin(balls[j].angle) * orbitDist2;
-
-                    const clashX = (wx1 + wx2) / 2;
-                    const clashY = (wy1 + wy2) / 2;
-
-                    spawnParticles(clashX, clashY, '#ffffff');
-                }
-            }
+        if (dist < b1.r + b2.r) {
+            const nx = dx / dist;
+            const ny = dy / dist;
+            const p = 2 * (b1.dx * nx + b1.dy * ny - b2.dx * nx - b2.dy * ny) / (b1.r + b2.r);
+            
+            b1.dx -= p * b2.r * nx; 
+            b1.dy -= p * b2.r * ny;
+            b2.dx += p * b1.r * nx; 
+            b2.dy += p * b1.r * ny;
+            
+            const overlap = (b1.r + b2.r - dist) / 2;
+            b1.x -= overlap * nx; 
+            b1.y -= overlap * ny;
+            b2.x += overlap * nx; 
+            b2.y += overlap * ny;
         }
 
         for (let i = 0; i < balls.length; i++) {
             for (let j = 0; j < balls.length; j++) {
-                if (i !== j) {
-                    if (checkWeaponHit(balls[i], balls[j])) {
-                        balls[j].health -= balls[i].damage;
-                        balls[j].iframes = 30;
-                        playHitSound();
+                if (i !== j && balls[j].inv === 0) {
+                    let wx = balls[i].x + Math.cos(balls[i].a) * (balls[i].r + balls[i].len);
+                    let wy = balls[i].y + Math.sin(balls[i].a) * (balls[i].r + balls[i].len);
+                    
+                    if (Math.hypot(balls[j].x - wx, balls[j].y - wy) < balls[j].r) {
+                        balls[j].hp -= balls[i].dmg;
+                        balls[j].inv = 30;
+                        
+                        let soundClone = hitSound.cloneNode();
+                        soundClone.volume = 0.6;
+                        soundClone.play().catch(e => console.log(e));
+                        
                         triggerShake();
-                        spawnParticles(balls[j].x, balls[j].y, balls[j].color);
 
-                        if (balls[i].type === 'Sword') {
-                            let sign = balls[i].spinSpeed < 0 ? -1 : 1;
-                            let currentPeriod = (2 * Math.PI) / (Math.abs(balls[i].spinSpeed) * 60);
-                            let newPeriod = currentPeriod - 0.01;
-                            if (newPeriod < 0.05) newPeriod = 0.05;
-                            balls[i].spinSpeed = sign * ((2 * Math.PI) / (newPeriod * 60));
-                        } else if (balls[i].type === 'Spear') {
-                            balls[i].wLength += 1.5;
-                            balls[i].damage += 0.5;
-                        } else if (balls[i].type === 'Axe') {
-                            balls[i].health += 5;
+                        if(balls[i].type === 'Spear') balls[i].len += 1.5;
+                        if(balls[i].type === 'Sword') {
+                            let sign = balls[i].spin < 0 ? -1 : 1;
+                            balls[i].spin = sign * (Math.abs(balls[i].spin) + 0.005);
                         }
-                        }
+                        if(balls[i].type === 'Axe') balls[i].hp += 5;
                     }
                 }
             }
         }
 
-    function animate() {
-        requestAnimationFrame(animate);
+        balls.forEach(b => b.update());
+        balls = balls.filter(b => b.hp > 0);
 
-        if (isPaused) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = p1Ball.color;
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillText(p1Ball.type + ' HP: ' + Math.max(0, p1Ball.health), 20, 20);
-
-        ctx.fillStyle = p2Ball.color;
-        ctx.textAlign = 'right';
-        ctx.fillText(p2Ball.type + ' HP: ' + Math.max(0, p2Ball.health), canvas.width - 20, 20);
-
-        particles.forEach(particle => {
-            particle.draw();
-            particle.update();
-        });
-
-        particles = particles.filter(particle => particle.alpha > 0);
-
-        if (balls.length <= 1) {
-            balls.forEach(ball => {
-                ball.dx = 0;
-                ball.dy = 0;
-                ball.draw();
-            });
-
-            ctx.fillStyle = '#000';
-            ctx.font = 'bold 50px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            if (balls.length === 1) {
-                ctx.fillText(balls[0].type + ' WINS!', canvas.width / 2, canvas.height / 2 - 40);
-                ctx.fillStyle = balls[0].color;
-                ctx.font = 'bold 30px Arial';
-                ctx.fillText(balls[0].health + ' HP LEFT', canvas.width / 2, canvas.height / 2 + 30);
-            } else {
-                ctx.fillText('DOUBLE KO!', canvas.width / 2, canvas.height / 2);
-            }
-            return; 
+        if (balls[0]) {
+            ctx.fillStyle = balls[0].c;
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(balls[0].type + ' HP: ' + Math.max(0, Math.floor(balls[0].hp)), 20, 20);
         }
-
-        balls.forEach(ball => {
-            ball.draw();
-            ball.update();
-        });
-
-        checkCollisions();
-        balls = balls.filter(ball => ball.health > 0);
+        if (balls[1]) {
+            ctx.fillStyle = balls[1].c;
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+            ctx.fillText(balls[1].type + ' HP: ' + Math.max(0, Math.floor(balls[1].hp)), 580, 20);
+        }
     }
 </script>
-
 </body>
-
 </html>
-
-
