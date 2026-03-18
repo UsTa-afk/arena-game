@@ -263,14 +263,26 @@
             this.color = color;
             this.alpha = 1;
         }
-        draw() {
-            ctx.save();
-            ctx.globalAlpha = this.alpha;
+draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
+            ctx.fillStyle = (this.iframes > 0 && Math.floor(Date.now() / 100) % 2 === 0) ? '#fff' : this.color;
             ctx.fill();
-            ctx.restore();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.fillStyle = '#000';
+            let fontSize = Math.floor(this.radius * 0.7);
+            ctx.font = 'bold ' + fontSize + 'px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(Math.max(0, Math.floor(this.health)), this.x, this.y);
+
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle);
         }
         update() {
             this.x += this.dx;
@@ -569,12 +581,6 @@
         if (isPaused) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = p1Ball.color;
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillText(p1Ball.type + ' HP: ' + Math.max(0, Math.floor(p1Ball.health)), 20, 20);
 
         ctx.fillStyle = p2Ball.color;
         ctx.textAlign = 'right';
