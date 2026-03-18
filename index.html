@@ -582,10 +582,6 @@
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.fillStyle = p2Ball.color;
-        ctx.textAlign = 'right';
-        ctx.fillText(p2Ball.type + ' HP: ' + Math.max(0, Math.floor(p2Ball.health)), canvas.width - 20, 20);
-
         particles.forEach(particle => {
             particle.draw();
             particle.update();
