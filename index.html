@@ -1,170 +1,732 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simple Arena</title>
-<style>
-    body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #2c3e50; font-family: sans-serif; }
-    canvas { border: 4px solid #000; background: #fcf9f2; display: none; transition: transform 0.05s; }
-    #menu { background: white; padding: 40px; border-radius: 15px; text-align: center; max-width: 500px; }
-    .card { border: 3px solid #ddd; border-radius: 10px; padding: 20px; cursor: pointer; display: inline-block; margin: 10px; width: 80px; }
-    .card.p1 { border-color: #e74c3c; background: #fadbd8; }
-    .card.p2 { border-color: #3498db; background: #d6eaf8; }
-    button { background: #27ae60; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 10px;}
-    #restart { position: absolute; top: 20px; right: 20px; background: #e74c3c; display: none; }
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Arena Battle - Final</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="custom-styles">
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+body {
+    background-color: #051329;
+    color: white;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, rgba(0, 255, 255, 0.1) 2px, transparent 2px),
+                linear-gradient(90deg, transparent calc(100% - 2px), rgba(255, 165, 0, 0.1) 2px);
+    background-size: 15% 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+.bg-grid {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: linear-gradient(rgba(14, 56, 122, 0.3) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(14, 56, 122, 0.3) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+}
+.font-montserrat { font-family: "Montserrat", sans-serif; }
+.font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+.glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
+.glow-yellow { box-shadow: 0 0 15px rgba(234, 179, 8, 0.5), inset 0 0 10px rgba(234, 179, 8, 0.2); border-color: rgba(234, 179, 8, 0.8); }
+.glow-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.5), inset 0 0 10px rgba(6, 182, 212, 0.2); border-color: rgba(6, 182, 212, 0.8); }
+.glow-orange { box-shadow: 0 0 15px rgba(249, 115, 22, 0.5), inset 0 0 10px rgba(249, 115, 22, 0.2); border-color: rgba(249, 115, 22, 0.8); }
+.glow-purple { box-shadow: 0 0 15px rgba(168, 85, 247, 0.5), inset 0 0 10px rgba(168, 85, 247, 0.2); border-color: rgba(168, 85, 247, 0.8); }
+.glow-emerald { box-shadow: 0 0 15px rgba(16, 185, 129, 0.5), inset 0 0 10px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.8); }
+.glow-rose { box-shadow: 0 0 15px rgba(225, 29, 72, 0.5), inset 0 0 10px rgba(225, 29, 72, 0.2); border-color: rgba(225, 29, 72, 0.8); }
+
+.btn-3d { box-shadow: 0 4px 0 0 rgba(21, 128, 61, 1); transition: all 0.1s ease; }
+.btn-3d:active { transform: translatey(4px); box-shadow: 0 0 0 0 rgba(21, 128, 61, 1); }
+
+.weapon-card { transition: all 0.3s ease; }
+.p1-selected { border-color: #00f3ff !important; box-shadow: 0 0 25px rgba(0, 243, 255, 0.8), inset 0 0 15px rgba(0, 243, 255, 0.4) !important; transform: scale(1.05); }
+.p2-selected { border-color: #ff7b00 !important; box-shadow: 0 0 25px rgba(255, 123, 0, 0.8), inset 0 0 15px rgba(255, 123, 0, 0.4) !important; transform: scale(1.05); }
+
+#startBtn { opacity: 0.5; pointer-events: none; }
+#startBtn.ready { opacity: 1; pointer-events: all; }
+
+.neon-box-blue { box-shadow: 0 0 15px #00f3ff, inset 0 0 15px #00f3ff; border: 2px solid #00f3ff; }
+.neon-box-orange { box-shadow: 0 0 15px #ff7b00, inset 0 0 15px #ff7b00; border: 2px solid #ff7b00; }
+.neon-box-purple { box-shadow: 0 0 25px #a855f7, inset 0 0 15px #a855f7; border: 2px solid #a855f7; }
+
+.health-bar-container { clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%); transition: width 0.2s ease-out; }
+.health-bar-container-reverse { clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%); transition: width 0.2s ease-out; }
+
+#gameUI { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 0.5rem; }
+
+canvas {
+    background-color: #0a1128;
+    display: block;
+    border-radius: 12px;
+    max-height: 65vh;
+    max-width: 95vw;
+    object-fit: contain;
+}
+
+@keyframes shake {
+    0% { transform: translate(2px, 2px) rotate(0deg); }
+    20% { transform: translate(-2px, -2px) rotate(-1deg); }
+    40% { transform: translate(-3px, 0px) rotate(1deg); }
+    60% { transform: translate(3px, 2px) rotate(0deg); }
+    80% { transform: translate(1px, -2px) rotate(-1deg); }
+    100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+.shake { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
+
+#restartBtn {
+    position: absolute; top: 20px; right: 20px; padding: 12px 24px; background: #ef4444; color: white;
+    border: none; cursor: pointer; display: none; font-weight: bold; border-radius: 8px; z-index: 60;
+    font-family: "Montserrat", sans-serif; box-shadow: 0 4px 0 0 #b91c1c; transition: all 0.1s ease;
+}
+#restartBtn:active { transform: translatey(4px); box-shadow: 0 0 0 0 #b91c1c; }
 </style>
 </head>
-<body>
+<body class="relative flex flex-col items-center justify-between z-10 font-montserrat">
+<div class="bg-grid"></div>
 
-<div id="menu">
-    <h1>ARENA BATTLE</h1>
-    <h3 id="status">Player 1: Choose</h3>
-    <div id="roster"></div>
-    <button onclick="location.reload()" style="background:#e74c3c">Reset</button>
-    <button id="start" onclick="start()" style="display:none">START</button>
+<main id="menu" class="relative z-10 w-full max-w-5xl px-4 py-8 flex flex-col items-center min-h-screen justify-center">
+    <header class="text-center mb-8">
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-wider mb-2 drop-shadow-lg font-orbitron">ARENA BATTLE</h1>
+        <p id="statusText" class="text-xl font-semibold text-slate-200 drop-shadow-md">Player 1: Choose your fighter</p>
+    </header>
+
+    <section class="flex flex-wrap justify-center items-center gap-6 w-full max-w-4xl mb-4">
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-yellow flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Sword')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
+                <img alt="Sword" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" src="sword.png"/>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">SWORD</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 100</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-yellow-400 h-1.5 rounded-full" style="width: 100%"></div></div>
+                </div>
+                <div class="text-xs font-semibold">Speed: Fast</div>
+            </div>
+        </article>
+
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-cyan flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Spear')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
+                <img alt="Spear" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" src="spear.png"/>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">SPEAR</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 80</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-cyan-400 h-1.5 rounded-full" style="width: 80%"></div></div>
+                </div>
+                <div class="text-xs font-semibold">Special: Reach</div>
+            </div>
+        </article>
+
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-orange flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Axe')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
+                <img alt="Axe" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]" src="axe.png"/>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">AXE</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 150</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-orange-500 h-1.5 rounded-full" style="width: 100%"></div></div>
+                </div>
+                <div class="text-xs font-semibold">Special: Lifesteal</div>
+            </div>
+        </article>
+
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-purple flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Hammer')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
+                <img alt="Hammer" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" src="hammer.png"/>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">HAMMER</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 200</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-purple-500 h-1.5 rounded-full" style="width: 100%"></div></div>
+                </div>
+                <div class="text-xs font-semibold">Special: Stun</div>
+            </div>
+        </article>
+
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-emerald flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Dagger')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
+                <img alt="Dagger" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" src="dagger.png"/>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">DAGGER</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 60</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width: 60%"></div></div>
+                </div>
+                <div class="text-xs font-semibold">Special: Fast Hits</div>
+            </div>
+        </article>
+
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-rose flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Scythe')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
+                <img alt="Scythe" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(225,29,72,0.8)]" src="scythe.png"/>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">SCYTHE</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 120</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-rose-500 h-1.5 rounded-full" style="width: 100%"></div></div>
+                </div>
+                <div class="text-xs font-semibold">Special: Grow</div>
+            </div>
+        </article>
+    </section>
+
+  <section class="flex flex-row items-center gap-6 mt-6">
+        <button id="resetMenuBtn" class="bg-slate-500/50 hover:bg-slate-500/70 border border-slate-400 text-slate-200 font-medium py-2 px-4 rounded-lg text-sm transition-colors" onclick="resetSelection()">
+            Reset Selection
+        </button>
+        <button id="startBtn" class="btn-3d bg-gradient-to-b from-green-400 to-green-600 hover:from-green-300 hover:to-green-500 text-white font-bold py-3 px-10 rounded-xl text-xl uppercase tracking-wider drop-shadow-md" onclick="startGame()">
+            START FIGHT
+        </button>
+    </section>
+</main>
+
+<div id="gameUI" class="relative z-10 font-orbitron">
+    <header class="w-full max-w-4xl flex flex-col items-center relative z-20 mt-4 px-8">
+        <div class="flex w-full items-center justify-between gap-8">
+            <div class="flex-1 flex flex-col gap-2">
+                <span id="p1Label" class="text-cyan-400 font-bold tracking-widest text-lg">P1</span>
+                <div class="h-6 w-full bg-slate-800/50 rounded-full overflow-hidden neon-box-blue p-1 health-bar-container">
+                    <div id="p1HealthBar" class="h-full w-full bg-cyan-400 rounded-full shadow-[0_0_10px_#00f3ff]" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="text-5xl font-black italic flex items-center justify-center mt-6">
+                <span class="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">VS</span>
+            </div>
+            <div class="flex-1 flex flex-col gap-2 text-right">
+                <span id="p2Label" class="text-orange-500 font-bold tracking-widest text-lg">P2</span>
+                <div class="h-6 w-full bg-slate-800/50 rounded-full overflow-hidden neon-box-orange p-1 flex justify-end health-bar-container-reverse">
+                    <div id="p2HealthBar" class="h-full w-full bg-orange-500 rounded-full shadow-[0_0_10px_#ff7b00]" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full flex items-center justify-center relative z-10 mt-2">
+        <canvas id="gameCanvas" width="600" height="600" class="neon-box-purple"></canvas>
+    </main>
 </div>
 
-<canvas id="game" width="600" height="600"></canvas>
-<button id="restart" onclick="location.reload()">Reset Game</button>
+<button id="restartBtn" onclick="location.reload()">RESET GAME</button>
 
 <script>
-    const stats = {
-        'Sword': { c: '#fce883', hp: 100, r: 35, s: 4, len: 60, dmg: 1 },
-        'Spear': { c: '#5dd1b2', hp: 80, r: 25, s: 6, len: 80, dmg: 1.5 },
-        'Axe':   { c: '#e67e22', hp: 150, r: 45, s: 2.5, len: 50, dmg: 2 }
+    const weaponStats = {
+        'Sword':  { color: '#fce883', hp: 100, radius: 35, speed: 4.0, src: 'sword.png' },
+        'Spear':  { color: '#5dd1b2', hp: 80,  radius: 35, speed: 6.0, src: 'spear.png' },
+        'Axe':    { color: '#e67e22', hp: 150, radius: 35, speed: 2.5, src: 'axe.png' },
+        'Hammer': { color: '#a855f7', hp: 200, radius: 35, speed: 2.0, src: 'hammer.png' },
+        'Dagger': { color: '#10b981', hp: 60,  radius: 30, speed: 7.0, src: 'dagger.png' },
+        'Scythe': { color: '#e11d48', hp: 120, radius: 35, speed: 3.5, src: 'scythe.png' }
     };
 
-    let p1 = null, p2 = null, balls = [];
-    const ctx = document.getElementById('game').getContext('2d');
-    const hitSound = new Audio('clash.mp3');
+    let player1Choice = null;
+    let player2Choice = null;
 
-    const roster = document.getElementById('roster');
-    for(let k in stats) {
-        roster.innerHTML += `<div class="card" onclick="sel('${k}', this)"><div style="width:40px;height:40px;background:${stats[k].c};border-radius:50%;margin:auto"></div><b>${k}</b></div>`;
+    function selectWeapon(type) {
+        const cards = document.querySelectorAll('.weapon-card');
+        const status = document.getElementById('statusText');
+
+        if (!player1Choice) {
+            player1Choice = type;
+            highlightCard(cards, type, 'p1-selected');
+            status.innerText = "Player 2: Choose your fighter";
+            status.style.color = "#ff7b00";
+        } else if (!player2Choice && player1Choice !== type) {
+            player2Choice = type;
+            highlightCard(cards, type, 'p2-selected');
+            status.innerHTML = "Ready! Press ENTER to Fight (or ESC to Reset)";
+            status.style.color = "#22c55e";
+        }
+    }
+    function highlightCard(cards, type, cssClass) {
+        cards.forEach(card => {
+            if(card.innerText.includes(type)) {
+                card.classList.add(cssClass);
+            }
+        });
     }
 
-    function sel(type, el) {
-        if (!p1) {
-            p1 = type;
-            el.classList.add('p1');
-            document.getElementById('status').innerText = "Player 2: Choose";
-        } else if (!p2 && type !== p1) {
-            p2 = type;
-            el.classList.add('p2');
-            document.getElementById('status').innerText = "Ready!";
-            document.getElementById('start').style.display = "inline-block";
+    function resetSelection() {
+        player1Choice = null;
+        player2Choice = null;
+        const cards = document.querySelectorAll('.weapon-card');
+        cards.forEach(card => {
+            card.classList.remove('p1-selected');
+            card.classList.remove('p2-selected');
+        });
+        const status = document.getElementById('statusText');
+        status.innerText = "Player 1: Choose your fighter";
+        status.style.color = "#00f3ff";
+        document.getElementById('startBtn').classList.remove('ready');
+    }
+
+    const hitSound = new Audio('clash.mp3');
+
+    function playHitSound() {
+        let soundClone = hitSound.cloneNode();
+        soundClone.volume = 0.6;
+        soundClone.play().catch(e => console.log(e));
+    }
+
+    function triggerShake() {
+        const canvasEl = document.getElementById('gameCanvas');
+        canvasEl.classList.remove('shake');
+        void canvasEl.offsetWidth;
+        canvasEl.classList.add('shake');
+    }
+
+    function startGame() {
+        if (!player1Choice || !player2Choice) return;
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('gameUI').style.display = 'flex';
+        document.getElementById('restartBtn').style.display = 'block';
+        
+        document.getElementById('p1Label').innerText = "P1 - " + player1Choice.toUpperCase();
+        document.getElementById('p2Label').innerText = "P2 - " + player2Choice.toUpperCase();
+
+        hitSound.play().then(() => {
+            hitSound.pause();
+            hitSound.currentTime = 0;
+        }).catch(e => console.log(e));
+
+        createBall(player1Choice, 1);
+        createBall(player2Choice, 2);
+        animate();
+    }
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let isPaused = false;
+    let balls = []; 
+    let particles = [];
+    let p1Ball = null;
+    let p2Ball = null;
+
+   window.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey) {
+            isPaused = !isPaused;
+        }
+        if (e.key === 'Enter') {
+            startGame();
+        }
+        if (e.key === 'Escape') {
+            resetSelection();
+        }
+    });
+
+    class Particle {
+        constructor(x, y, dx, dy, color) {
+            this.x = x;
+            this.y = y;
+            this.radius = Math.random() * 4 + 1;
+            this.dx = dx;
+            this.dy = dy;
+            this.color = color;
+            this.alpha = 1;
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.restore();
+        }
+        update() {
+            this.x += this.dx;
+            this.y += this.dy;
+            this.alpha -= 0.04;
+        }
+    }
+
+    function spawnParticles(x, y, color) {
+        for (let k = 0; k < 15; k++) {
+            const pDx = (Math.random() - 0.5) * 10;
+            const pDy = (Math.random() - 0.5) * 10;
+            particles.push(new Particle(x, y, pDx, pDy, color));
         }
     }
 
     class Ball {
-        constructor(type, num) {
-            let st = stats[type];
-            Object.assign(this, st);
+        constructor(x, y, radius, dx, dy, color, health, type, src) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+            this.dx = dx;
+            this.dy = dy;
+            this.mass = radius;
+            this.color = color;
+            this.health = health;
+            this.maxHealth = health;
             this.type = type;
-            this.x = num === 1 ? 150 : 450;
-            this.y = 300;
-            this.dx = num === 1 ? this.s : -this.s;
-            this.dy = Math.random() * 4 - 2;
-            this.a = 0;
-            this.spin = Math.random() * 0.05 + 0.05;
-            this.inv = 0;
+            this.img = new Image();
+            this.img.src = src;
+            this.angle = 0;
+            this.spinSpeed = (Math.random() * 0.05) + 0.05;
+            this.wLength = radius * 2.5;
+            this.wWidth = radius * 0.6;
+            this.iframes = 0;
+            this.damage = 1;
+            this.weaponCooldown = 0;
         }
 
-        update() {
-            if (this.x + this.r > 600 || this.x - this.r < 0) this.dx *= -1;
-            if (this.y + this.r > 600 || this.y - this.r < 0) this.dy *= -1;
-            this.x += this.dx;
-            this.y += this.dy;
-            this.a += this.spin;
-            if (this.inv > 0) this.inv--;
-
+draw() {
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-            ctx.fillStyle = (this.inv > 0 && Math.floor(Date.now() / 100) % 2 === 0) ? '#fff' : this.c;
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = (this.iframes > 0 && Math.floor(Date.now() / 100) % 2 === 0) ? '#fff' : this.color;
             ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000';
             ctx.stroke();
+            ctx.closePath();
+
+            ctx.fillStyle = '#000';
+            let fontSize = Math.floor(this.radius * 0.7);
+            ctx.font = 'bold ' + fontSize + 'px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(Math.max(0, Math.floor(this.health)), this.x, this.y);
 
             ctx.save();
             ctx.translate(this.x, this.y);
-            ctx.rotate(this.a);
-            ctx.fillStyle = '#333';
-            ctx.fillRect(this.r, -8, this.len, 16);
+            ctx.rotate(this.angle);
+
+            const drawOffset = this.radius + 5;
+
+            if (this.img.complete && this.img.naturalWidth !== 0) {
+                ctx.translate(drawOffset + this.wLength / 2, 0);
+                let isVertical = this.img.naturalHeight > this.img.naturalWidth;
+                let drawW, drawH;
+                if (isVertical) {
+                    ctx.rotate(Math.PI / 2);
+                    let ratio = this.img.naturalWidth / this.img.naturalHeight;
+                    drawH = this.wLength;
+                    drawW = this.wLength * ratio;
+                    ctx.drawImage(this.img, -drawW / 2, -drawH / 2, drawW, drawH);
+                } else {
+                    let ratio = this.img.naturalHeight / this.img.naturalWidth;
+                    drawW = this.wLength;
+                    drawH = this.wLength * ratio;
+                    ctx.drawImage(this.img, -drawW / 2, -drawH / 2, drawW, drawH);
+                }
+            } else {
+                ctx.fillStyle = '#333';
+                ctx.fillRect(drawOffset, -this.wWidth / 2, this.wLength, this.wWidth);
+                ctx.strokeStyle = '#000';
+                ctx.strokeRect(drawOffset, -this.wWidth / 2, this.wLength, this.wWidth);
+            }
             ctx.restore();
         }
-    }
 
-    function start() {
-        document.getElementById('menu').style.display = 'none';
-        document.getElementById('game').style.display = 'block';
-        document.getElementById('restart').style.display = 'block';
-        balls.push(new Ball(p1, 1), new Ball(p2, 2));
-        loop();
-    }
-
-    function loop() {
-        requestAnimationFrame(loop);
-        ctx.clearRect(0, 0, 600, 600);
-
-        if (balls.length < 2) {
-            ctx.fillStyle = '#000';
-            ctx.font = 'bold 40px Arial';
-            ctx.textAlign = 'center';
-            if (balls.length === 1) {
-                ctx.fillText(balls[0].type + ' WINS!', 300, 260);
-                ctx.fillText(Math.floor(balls[0].hp) + ' HP', 300, 320);
-            } else {
-                ctx.fillText('DOUBLE KO!', 300, 300);
+        update() {
+            if (this.x + this.radius > canvas.width) {
+                this.x = canvas.width - this.radius;
+                this.dx = -this.dx;
+            } else if (this.x - this.radius < 0) {
+                this.x = this.radius;
+                this.dx = -this.dx;
             }
-            return;
+
+            if (this.y + this.radius > canvas.height) {
+                this.y = canvas.height - this.radius;
+                this.dy = -this.dy;
+            } else if (this.y - this.radius < 0) {
+                this.y = this.radius;
+                this.dy = -this.dy;
+            }
+
+            this.x += this.dx;
+            this.y += this.dy;
+            this.angle += this.spinSpeed;
+
+            if (this.iframes > 0) this.iframes--;
+            if (this.weaponCooldown > 0) this.weaponCooldown--;
         }
+    }
 
-        const b1 = balls[0], b2 = balls[1];
-        const dx = b2.x - b1.x, dy = b2.y - b1.y;
-        const dist = Math.hypot(dx, dy);
+    function createBall(type, playerNum) {
+        const stats = weaponStats[type];
+        let x = (playerNum === 1) ? 150 : 450;
+        let y = 300;
+        let dx = (playerNum === 1) ? stats.speed : -stats.speed;
+        let dy = (Math.random() * 4) - 2; 
 
-        if (dist < b1.r + b2.r) {
-            const nx = dx / dist, ny = dy / dist;
-            const p = 2 * (b1.dx * nx + b1.dy * ny - b2.dx * nx - b2.dy * ny) / (b1.r + b2.r);
-            b1.dx -= p * b2.r * nx; b1.dy -= p * b2.r * ny;
-            b2.dx += p * b1.r * nx; b2.dy += p * b1.r * ny;
-            
-            const overlap = (b1.r + b2.r - dist) / 2;
-            b1.x -= overlap * nx; b1.y -= overlap * ny;
-            b2.x += overlap * nx; b2.y += overlap * ny;
+        let newBall = new Ball(x, y, stats.radius, dx, dy, stats.color, stats.hp, type, stats.src);
+        balls.push(newBall);
+        
+        if (playerNum === 1) p1Ball = newBall;
+        if (playerNum === 2) p2Ball = newBall;
+    }
+
+    function rotate(dx, dy, angle) {
+        return {
+            x: dx * Math.cos(angle) - dy * Math.sin(angle),
+            y: dx * Math.sin(angle) + dy * Math.cos(angle)
+        };
+    }
+
+    function resolveCollision(ball1, ball2) {
+        const xVelocityDiff = ball1.dx - ball2.dx;
+        const yVelocityDiff = ball1.dy - ball2.dy;
+        const xDist = ball2.x - ball1.x;
+        const yDist = ball2.y - ball1.y;
+
+        if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
+            const angle = -Math.atan2(ball2.y - ball1.y, ball2.x - ball1.x);
+            const m1 = ball1.mass;
+            const m2 = ball2.mass;
+
+            const u1 = rotate(ball1.dx, ball1.dy, angle);
+            const u2 = rotate(ball2.dx, ball2.dy, angle);
+
+            const v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y };
+            const v2 = { x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m1 / (m1 + m2), y: u2.y };
+
+            const vFinal1 = rotate(v1.x, v1.y, -angle);
+            const vFinal2 = rotate(v2.x, v2.y, -angle);
+
+            ball1.dx = vFinal1.x;
+            ball1.dy = vFinal1.y;
+            ball2.dx = vFinal2.x;
+            ball2.dy = vFinal2.y;
         }
+    }
 
+    function checkWeaponHit(attacker, defender) {
+        if (defender.iframes > 0) return false;
+
+        const orbitDist = attacker.radius + 5 + attacker.wLength / 2;
+        const wx = attacker.x + Math.cos(attacker.angle) * orbitDist;
+        const wy = attacker.y + Math.sin(attacker.angle) * orbitDist;
+
+        const dx = defender.x - wx;
+        const dy = defender.y - wy;
+
+        const localX = dx * Math.cos(-attacker.angle) - dy * Math.sin(-attacker.angle);
+        const localY = dx * Math.sin(-attacker.angle) + dy * Math.cos(-attacker.angle);
+
+        const halfW = attacker.wLength / 2;
+        const halfH = attacker.wWidth / 2;
+
+        let closestX = localX;
+        let closestY = localY;
+
+        if (closestX < -halfW) closestX = -halfW;
+        else if (closestX > halfW) closestX = halfW;
+
+        if (closestY < -halfH) closestY = -halfH;
+        else if (closestY > halfH) closestY = halfH;
+
+        const distX = localX - closestX;
+        const distY = localY - closestY;
+
+        return (distX * distX) + (distY * distY) < (defender.radius * defender.radius);
+    }
+
+    function getWeaponCorners(b) {
+        const orbitDist = b.radius + 5 + b.wLength / 2;
+        const cx = b.x + Math.cos(b.angle) * orbitDist;
+        const cy = b.y + Math.sin(b.angle) * orbitDist;
+        const hw = b.wLength / 2;
+        const hh = b.wWidth / 2;
+        const cosA = Math.cos(b.angle);
+        const sinA = Math.sin(b.angle);
+
+        return [
+            { x: cx + hw*cosA - hh*sinA, y: cy + hw*sinA + hh*cosA },
+            { x: cx + hw*cosA - (-hh)*sinA, y: cy + hw*sinA + (-hh)*cosA },
+            { x: cx + (-hw)*cosA - (-hh)*sinA, y: cy + (-hw)*sinA + (-hh)*cosA },
+            { x: cx + (-hw)*cosA - hh*sinA, y: cy + (-hw)*sinA + hh*cosA }
+        ];
+    }
+
+    function doPolygonsIntersect(a, b) {
+        const polygons = [a, b];
+        for (let i = 0; i < polygons.length; i++) {
+            const polygon = polygons[i];
+            for (let i1 = 0; i1 < polygon.length; i1++) {
+                const i2 = (i1 + 1) % polygon.length;
+                const p1 = polygon[i1];
+                const p2 = polygon[i2];
+                const normal = { x: p2.y - p1.y, y: p1.x - p2.x };
+
+                let minA = undefined, maxA = undefined;
+                for (let j = 0; j < a.length; j++) {
+                    const projected = normal.x * a[j].x + normal.y * a[j].y;
+                    if (minA === undefined || projected < minA) minA = projected;
+                    if (maxA === undefined || projected > maxA) maxA = projected;
+                }
+
+                let minB = undefined, maxB = undefined;
+                for (let j = 0; j < b.length; j++) {
+                    const projected = normal.x * b[j].x + normal.y * b[j].y;
+                    if (minB === undefined || projected < minB) minB = projected;
+                    if (maxB === undefined || projected > maxB) maxB = projected;
+                }
+
+                if (maxA < minB || maxB < minA) return false;
+            }
+        }
+        return true;
+    }
+
+    function checkWeaponVsWeapon(b1, b2) {
+        if (b1.weaponCooldown > 0 || b2.weaponCooldown > 0) return false;
+        const poly1 = getWeaponCorners(b1);
+        const poly2 = getWeaponCorners(b2);
+        return doPolygonsIntersect(poly1, poly2);
+    }
+
+    function checkCollisions() {
         for (let i = 0; i < balls.length; i++) {
-            for (let j = 0; j < balls.length; j++) {
-                if (i !== j && balls[j].inv === 0) {
-                    let wx = balls[i].x + Math.cos(balls[i].a) * (balls[i].r + balls[i].len);
-                    let wy = balls[i].y + Math.sin(balls[i].a) * (balls[i].r + balls[i].len);
-                    
-                    if (Math.hypot(balls[j].x - wx, balls[j].y - wy) < balls[j].r) {
-                        balls[j].hp -= balls[i].dmg;
-                        balls[j].inv = 30;
-                        hitSound.cloneNode().play().catch(e=>{});
-                        document.getElementById('game').style.transform = `translate(${Math.random()*8-4}px, ${Math.random()*8-4}px)`;
-                        setTimeout(() => document.getElementById('game').style.transform = 'none', 50);
+            for (let j = i + 1; j < balls.length; j++) {
+                const dx = balls[i].x - balls[j].x;
+                const dy = balls[i].y - balls[j].y;
+                const distance = Math.hypot(dx, dy);
 
-                        if(balls[i].type === 'Spear') balls[i].len += 1.5;
-                        if(balls[i].type === 'Sword') balls[i].spin *= (balls[i].spin < 0 ? 1.05 : -1.05);
-                        if(balls[i].type === 'Axe') balls[i].hp += 5;
-                    }
+                if (distance < balls[i].radius + balls[j].radius) {
+                    resolveCollision(balls[i], balls[j]);
                 }
             }
         }
 
-        balls.forEach(b => b.update());
-        balls = balls.filter(b => b.hp > 0);
+        for (let i = 0; i < balls.length; i++) {
+            for (let j = i + 1; j < balls.length; j++) {
+                if (checkWeaponVsWeapon(balls[i], balls[j])) {
+                    balls[i].spinSpeed *= -1;
+                    balls[j].spinSpeed *= -1;
+                    balls[i].weaponCooldown = 15;
+                    balls[j].weaponCooldown = 15;
+                    
+                    playHitSound();
+                    triggerShake();
+                    
+                    const orbitDist1 = balls[i].radius + 5 + balls[i].wLength / 2;
+                    const wx1 = balls[i].x + Math.cos(balls[i].angle) * orbitDist1;
+                    const wy1 = balls[i].y + Math.sin(balls[i].angle) * orbitDist1;
+                    
+                    const orbitDist2 = balls[j].radius + 5 + balls[j].wLength / 2;
+                    const wx2 = balls[j].x + Math.cos(balls[j].angle) * orbitDist2;
+                    const wy2 = balls[j].y + Math.sin(balls[j].angle) * orbitDist2;
 
-        ctx.fillStyle = '#000';
-        ctx.font = 'bold 20px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(`${balls[0]?.type} HP: ${Math.max(0, Math.floor(balls[0]?.hp||0))}`, 20, 30);
-        ctx.textAlign = 'right';
-        ctx.fillText(`${balls[1]?.type} HP: ${Math.max(0, Math.floor(balls[1]?.hp||0))}`, 580, 30);
+                    const clashX = (wx1 + wx2) / 2;
+                    const clashY = (wy1 + wy2) / 2;
+
+                    spawnParticles(clashX, clashY, '#ffffff');
+                }
+            }
+        }
+
+        for (let i = 0; i < balls.length; i++) {
+            for (let j = 0; j < balls.length; j++) {
+                if (i !== j) {
+                    if (checkWeaponHit(balls[i], balls[j])) {
+                        balls[j].health -= balls[i].damage;
+                        balls[j].iframes = 30;
+                        playHitSound();
+                        triggerShake();
+                        spawnParticles(balls[j].x, balls[j].y, balls[j].color);
+
+                        if (balls[i].type === 'Sword') {
+                            let sign = balls[i].spinSpeed < 0 ? -1 : 1;
+                            let currentPeriod = (2 * Math.PI) / (Math.abs(balls[i].spinSpeed) * 60);
+                            let newPeriod = currentPeriod - 0.01;
+                            if (newPeriod < 0.05) newPeriod = 0.05;
+                            balls[i].spinSpeed = sign * ((2 * Math.PI) / (newPeriod * 60));
+                        } else if (balls[i].type === 'Spear') {
+                            balls[i].wLength += 5.5;
+                            balls[i].damage += 0.5;
+                        } else if (balls[i].type === 'Axe') {
+                            balls[i].health += 5;
+                        } else if (balls[i].type === 'Hammer') {
+                            balls[j].spinSpeed *= 0.5;
+                            balls[j].weaponCooldown = 60;
+                        } else if (balls[i].type === 'Dagger') {
+                            balls[j].iframes = 10;
+                        } else if (balls[i].type === 'Scythe') {
+                            balls[i].radius += 1;
+                            balls[i].mass = balls[i].radius;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        if (isPaused) return;
+
+        if (p1Ball) {
+            let p1Pct = Math.max(0, (p1Ball.health / p1Ball.maxHealth) * 100);
+            document.getElementById('p1HealthBar').style.width = p1Pct + '%';
+        }
+        if (p2Ball) {
+            let p2Pct = Math.max(0, (p2Ball.health / p2Ball.maxHealth) * 100);
+            document.getElementById('p2HealthBar').style.width = p2Pct + '%';
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(particle => {
+            particle.draw();
+            particle.update();
+        });
+
+        particles = particles.filter(particle => particle.alpha > 0);
+
+        if (balls.length <= 1) {
+            balls.forEach(ball => {
+                ball.dx = 0;
+                ball.dy = 0;
+                ball.draw();
+            });
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 50px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            if (balls.length === 1) {
+                ctx.fillText(balls[0].type + ' WINS!', canvas.width / 2, canvas.height / 2 - 40);
+                ctx.fillStyle = balls[0].color;
+                ctx.font = 'bold 30px Orbitron';
+                ctx.fillText(Math.floor(balls[0].health) + ' HP LEFT', canvas.width / 2, canvas.height / 2 + 30);
+            } else {
+                ctx.fillText('DOUBLE KO!', canvas.width / 2, canvas.height / 2);
+            }
+            return; 
+        }
+
+        balls.forEach(ball => {
+            ball.draw();
+            ball.update();
+        });
+
+        checkCollisions();
+        balls = balls.filter(ball => ball.health > 0);
     }
 </script>
+
 </body>
 </html>
