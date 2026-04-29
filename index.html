@@ -653,7 +653,7 @@ draw() {
                             if (newPeriod < 0.05) newPeriod = 0.05;
                             balls[i].spinSpeed = sign * ((2 * Math.PI) / (newPeriod * 60));
                         } else if (balls[i].type === 'Spear') {
-                            balls[i].wLength += 1.5;
+                            balls[i].wLength += 5.5;
                             balls[i].damage += 0.5;
                         } else if (balls[i].type === 'Axe') {
                             balls[i].health += 5;
