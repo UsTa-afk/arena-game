@@ -3,82 +3,79 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Arena Battle - Fighter Selection</title>
+<title>Arena Battle - Final</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <style data-purpose="custom-styles">
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
 body {
-    font-family: "Montserrat", sans-serif;
+    background-color: #051329;
+    color: white;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
+    position: relative;
 }
-.bg-arena {
-    background-color: #0f172a;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-.glass-card {
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(8px);
-}
-.glow-yellow {
-    box-shadow: 0 0 15px rgba(234, 179, 8, 0.5), inset 0 0 10px rgba(234, 179, 8, 0.2);
-    border-color: rgba(234, 179, 8, 0.8);
-}
-.glow-cyan {
-    box-shadow: 0 0 15px rgba(6, 182, 212, 0.5), inset 0 0 10px rgba(6, 182, 212, 0.2);
-    border-color: rgba(6, 182, 212, 0.8);
-}
-.glow-orange {
-    box-shadow: 0 0 15px rgba(249, 115, 22, 0.5), inset 0 0 10px rgba(249, 115, 22, 0.2);
-    border-color: rgba(249, 115, 22, 0.8);
-}
-.btn-3d {
-    box-shadow: 0 4px 0 0 rgba(21, 128, 61, 1);
-    transition: all 0.1s ease;
-}
-.btn-3d:active {
-    transform: translatey(4px);
-    box-shadow: 0 0 0 0 rgba(21, 128, 61, 1);
-}
-.btn-reset {
-    box-shadow: 0 2px 0 0 rgba(51, 65, 85, 1);
-    transition: all 0.1s ease;
-}
-.btn-reset:active {
-    transform: translatey(2px);
-    box-shadow: 0 0 0 0 rgba(51, 65, 85, 1);
-}
-.weapon-card {
-    transition: all 0.3s ease;
-}
-.p1-selected {
-    border-color: #ef4444 !important;
-    box-shadow: 0 0 25px rgba(239, 68, 68, 0.8), inset 0 0 15px rgba(239, 68, 68, 0.4) !important;
-    transform: scale(1.05);
-}
-.p2-selected {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.8), inset 0 0 15px rgba(59, 130, 246, 0.4) !important;
-    transform: scale(1.05);
-}
-#startBtn {
-    opacity: 0.5;
-    pointer-events: none;
-}
-#startBtn.ready {
-    opacity: 1;
-    pointer-events: all;
-}
-canvas {
-    border: 4px solid #1e293b;
-    background-color: #fcf9f2;
-    box-shadow: 0 0 30px rgba(0,0,0,0.8);
-    display: none;
+body::before {
+    content: '';
     position: absolute;
-    z-index: 50;
-    border-radius: 8px;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, rgba(0, 255, 255, 0.1) 2px, transparent 2px),
+                linear-gradient(90deg, transparent calc(100% - 2px), rgba(255, 165, 0, 0.1) 2px);
+    background-size: 15% 100%;
+    pointer-events: none;
+    z-index: 0;
 }
+.bg-grid {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: linear-gradient(rgba(14, 56, 122, 0.3) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(14, 56, 122, 0.3) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+}
+.font-montserrat { font-family: "Montserrat", sans-serif; }
+.font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+.glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
+.glow-yellow { box-shadow: 0 0 15px rgba(234, 179, 8, 0.5), inset 0 0 10px rgba(234, 179, 8, 0.2); border-color: rgba(234, 179, 8, 0.8); }
+.glow-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.5), inset 0 0 10px rgba(6, 182, 212, 0.2); border-color: rgba(6, 182, 212, 0.8); }
+.glow-orange { box-shadow: 0 0 15px rgba(249, 115, 22, 0.5), inset 0 0 10px rgba(249, 115, 22, 0.2); border-color: rgba(249, 115, 22, 0.8); }
+.glow-purple { box-shadow: 0 0 15px rgba(168, 85, 247, 0.5), inset 0 0 10px rgba(168, 85, 247, 0.2); border-color: rgba(168, 85, 247, 0.8); }
+.glow-emerald { box-shadow: 0 0 15px rgba(16, 185, 129, 0.5), inset 0 0 10px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.8); }
+.glow-rose { box-shadow: 0 0 15px rgba(225, 29, 72, 0.5), inset 0 0 10px rgba(225, 29, 72, 0.2); border-color: rgba(225, 29, 72, 0.8); }
+
+.btn-3d { box-shadow: 0 4px 0 0 rgba(21, 128, 61, 1); transition: all 0.1s ease; }
+.btn-3d:active { transform: translatey(4px); box-shadow: 0 0 0 0 rgba(21, 128, 61, 1); }
+
+.weapon-card { transition: all 0.3s ease; }
+.p1-selected { border-color: #00f3ff !important; box-shadow: 0 0 25px rgba(0, 243, 255, 0.8), inset 0 0 15px rgba(0, 243, 255, 0.4) !important; transform: scale(1.05); }
+.p2-selected { border-color: #ff7b00 !important; box-shadow: 0 0 25px rgba(255, 123, 0, 0.8), inset 0 0 15px rgba(255, 123, 0, 0.4) !important; transform: scale(1.05); }
+
+#startBtn { opacity: 0.5; pointer-events: none; }
+#startBtn.ready { opacity: 1; pointer-events: all; }
+
+.neon-box-blue { box-shadow: 0 0 15px #00f3ff, inset 0 0 15px #00f3ff; border: 2px solid #00f3ff; }
+.neon-box-orange { box-shadow: 0 0 15px #ff7b00, inset 0 0 15px #ff7b00; border: 2px solid #ff7b00; }
+.neon-box-purple { box-shadow: 0 0 25px #a855f7, inset 0 0 15px #a855f7; border: 2px solid #a855f7; }
+
+.health-bar-container { clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%); transition: width 0.2s ease-out; }
+.health-bar-container-reverse { clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%); transition: width 0.2s ease-out; }
+
+#gameUI { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 0.5rem; }
+
+canvas {
+    background-color: #0a1128;
+    display: block;
+    border-radius: 12px;
+    max-height: 65vh;
+    max-width: 95vw;
+    object-fit: contain;
+}
+
 @keyframes shake {
     0% { transform: translate(2px, 2px) rotate(0deg); }
     20% { transform: translate(-2px, -2px) rotate(-1deg); }
@@ -87,98 +84,112 @@ canvas {
     80% { transform: translate(1px, -2px) rotate(-1deg); }
     100% { transform: translate(0px, 0px) rotate(0deg); }
 }
-.shake {
-    animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both;
-}
+.shake { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
+
 #restartBtn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 12px 24px;
-    background: #ef4444;
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: none;
-    font-weight: bold;
-    border-radius: 8px;
-    z-index: 60;
-    font-family: "Montserrat", sans-serif;
-    box-shadow: 0 4px 0 0 #b91c1c;
-    transition: all 0.1s ease;
+    position: absolute; top: 20px; right: 20px; padding: 12px 24px; background: #ef4444; color: white;
+    border: none; cursor: pointer; display: none; font-weight: bold; border-radius: 8px; z-index: 60;
+    font-family: "Montserrat", sans-serif; box-shadow: 0 4px 0 0 #b91c1c; transition: all 0.1s ease;
 }
-#restartBtn:active {
-    transform: translatey(4px);
-    box-shadow: 0 0 0 0 #b91c1c;
-}
+#restartBtn:active { transform: translatey(4px); box-shadow: 0 0 0 0 #b91c1c; }
 </style>
 </head>
-<body class="bg-arena min-h-screen flex items-center justify-center text-white relative">
-<div class="absolute inset-0 bg-slate-900/60 z-0"></div>
+<body class="relative flex flex-col items-center justify-between z-10 font-montserrat">
+<div class="bg-grid"></div>
 
-<main id="menu" class="relative z-10 w-full max-w-5xl px-4 py-8 flex flex-col items-center">
-    <header class="text-center mb-12">
-        <h1 class="text-5xl md:text-6xl font-extrabold tracking-wider mb-2 drop-shadow-lg">ARENA BATTLE</h1>
+<main id="menu" class="relative z-10 w-full max-w-5xl px-4 py-8 flex flex-col items-center min-h-screen justify-center">
+    <header class="text-center mb-8">
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-wider mb-2 drop-shadow-lg font-orbitron">ARENA BATTLE</h1>
         <p id="statusText" class="text-xl font-semibold text-slate-200 drop-shadow-md">Player 1: Choose your fighter</p>
     </header>
 
-    <section class="flex flex-row justify-center items-center gap-8 w-full max-w-5xl mb-4">
-        <article class="weapon-card glass-card rounded-2xl p-6 border-2 glow-yellow flex flex-col items-center text-center cursor-pointer hover:scale-105 w-64 h-[350px]" onclick="selectWeapon('Sword')">
-            <div class="w-32 h-40 mb-4 flex items-center justify-center">
+    <section class="flex flex-wrap justify-center items-center gap-6 w-full max-w-4xl mb-4">
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-yellow flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Sword')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
                 <img alt="Sword" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" src="sword.png"/>
             </div>
-            <h2 class="text-2xl font-bold mb-4 tracking-wide">SWORD</h2>
-            <div class="w-full text-left space-y-3 mt-auto">
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">SWORD</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
                 <div>
-                    <div class="flex justify-between text-sm font-semibold mb-1">
-                        <span>HP: 100</span>
-                    </div>
-                    <div class="w-full bg-slate-700 rounded-full h-2">
-                        <div class="bg-yellow-400 h-2 rounded-full" style="width: 100%"></div>
-                    </div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 100</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-yellow-400 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-sm font-semibold">Speed: Fast</div>
+                <div class="text-xs font-semibold">Speed: Fast</div>
             </div>
         </article>
 
-        <article class="weapon-card glass-card rounded-2xl p-6 border-2 glow-cyan flex flex-col items-center text-center cursor-pointer hover:scale-105 w-64 h-[350px]" onclick="selectWeapon('Spear')">
-            <div class="w-32 h-40 mb-4 flex items-center justify-center">
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-cyan flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Spear')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
                 <img alt="Spear" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" src="spear.png"/>
             </div>
-            <h2 class="text-2xl font-bold mb-4 tracking-wide">SPEAR</h2>
-            <div class="w-full text-left space-y-3 mt-auto">
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">SPEAR</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
                 <div>
-                    <div class="flex justify-between text-sm font-semibold mb-1">
-                        <span>HP: 80</span>
-                    </div>
-                    <div class="w-full bg-slate-700 rounded-full h-2">
-                        <div class="bg-cyan-400 h-2 rounded-full" style="width: 80%"></div>
-                    </div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 80</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-cyan-400 h-1.5 rounded-full" style="width: 80%"></div></div>
                 </div>
-                <div class="text-sm font-semibold">Special: Grows longer</div>
+                <div class="text-xs font-semibold">Special: Reach</div>
             </div>
         </article>
 
-        <article class="weapon-card glass-card rounded-2xl p-6 border-2 glow-orange flex flex-col items-center text-center cursor-pointer hover:scale-105 w-64 h-[350px]" onclick="selectWeapon('Axe')">
-            <div class="w-32 h-40 mb-4 flex items-center justify-center">
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-orange flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Axe')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
                 <img alt="Axe" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]" src="axe.png"/>
             </div>
-            <h2 class="text-2xl font-bold mb-4 tracking-wide">AXE</h2>
-            <div class="w-full text-left space-y-3 mt-auto">
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">AXE</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
                 <div>
-                    <div class="flex justify-between text-sm font-semibold mb-1">
-                        <span>HP: 150</span>
-                    </div>
-                    <div class="w-full bg-slate-700 rounded-full h-2">
-                        <div class="bg-orange-500 h-2 rounded-full" style="width: 100%"></div>
-                    </div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 150</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-orange-500 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-sm font-semibold">Special: Lifesteal</div>
+                <div class="text-xs font-semibold">Special: Lifesteal</div>
+            </div>
+        </article>
+
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-purple flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Hammer')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
+                <img alt="Hammer" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" src="hammer.png"/>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">HAMMER</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 200</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-purple-500 h-1.5 rounded-full" style="width: 100%"></div></div>
+                </div>
+                <div class="text-xs font-semibold">Special: Stun</div>
+            </div>
+        </article>
+
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-emerald flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Dagger')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
+                <img alt="Dagger" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" src="dagger.png"/>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">DAGGER</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 60</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width: 60%"></div></div>
+                </div>
+                <div class="text-xs font-semibold">Special: Fast Hits</div>
+            </div>
+        </article>
+
+        <article class="weapon-card glass-card rounded-2xl p-4 border-2 glow-rose flex flex-col items-center text-center cursor-pointer hover:scale-105 w-48 h-[260px]" onclick="selectWeapon('Scythe')">
+            <div class="w-20 h-20 mb-2 flex items-center justify-center">
+                <img alt="Scythe" class="max-w-full max-h-full object-contain filter drop-shadow-[0_0_8px_rgba(225,29,72,0.8)]" src="scythe.png"/>
+            </div>
+            <h2 class="text-xl font-bold mb-2 tracking-wide font-orbitron">SCYTHE</h2>
+            <div class="w-full text-left space-y-2 mt-auto">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 120</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-rose-500 h-1.5 rounded-full" style="width: 100%"></div></div>
+                </div>
+                <div class="text-xs font-semibold">Special: Grow</div>
             </div>
         </article>
     </section>
 
-    <section class="flex flex-row items-center gap-6 mt-8">
+    <section class="flex flex-row items-center gap-6 mt-6">
         <button id="resetMenuBtn" class="bg-slate-500/50 hover:bg-slate-500/70 border border-slate-400 text-slate-200 font-medium py-2 px-4 rounded-lg text-sm transition-colors" onclick="resetSelection()">
             Reset Selection
         </button>
@@ -188,13 +199,42 @@ canvas {
     </section>
 </main>
 
-<canvas id="gameCanvas" width="600" height="600" style="display: none;"></canvas><button id="restartBtn" onclick="location.reload()">RESET GAME</button>
+<div id="gameUI" class="relative z-10 font-orbitron">
+    <header class="w-full max-w-4xl flex flex-col items-center relative z-20 mt-4 px-8">
+        <div class="flex w-full items-center justify-between gap-8">
+            <div class="flex-1 flex flex-col gap-2">
+                <span id="p1Label" class="text-cyan-400 font-bold tracking-widest text-lg">P1</span>
+                <div class="h-6 w-full bg-slate-800/50 rounded-full overflow-hidden neon-box-blue p-1 health-bar-container">
+                    <div id="p1HealthBar" class="h-full w-full bg-cyan-400 rounded-full shadow-[0_0_10px_#00f3ff]" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="text-5xl font-black italic flex items-center justify-center mt-6">
+                <span class="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">VS</span>
+            </div>
+            <div class="flex-1 flex flex-col gap-2 text-right">
+                <span id="p2Label" class="text-orange-500 font-bold tracking-widest text-lg">P2</span>
+                <div class="h-6 w-full bg-slate-800/50 rounded-full overflow-hidden neon-box-orange p-1 flex justify-end health-bar-container-reverse">
+                    <div id="p2HealthBar" class="h-full w-full bg-orange-500 rounded-full shadow-[0_0_10px_#ff7b00]" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full flex items-center justify-center relative z-10 mt-2">
+        <canvas id="gameCanvas" width="600" height="600" class="neon-box-purple"></canvas>
+    </main>
+</div>
+
+<button id="restartBtn" onclick="location.reload()">RESET GAME</button>
 
 <script>
     const weaponStats = {
-        'Sword': { color: '#fce883', hp: 100, radius: 35, speed: 4, src: 'sword.png' },
-        'Spear': { color: '#5dd1b2', hp: 80, radius: 25, speed: 6, src: 'spear.png' },
-        'Axe':   { color: '#e67e22', hp: 150, radius: 45, speed: 2.5, src: 'axe.png' }
+        'Sword':  { color: '#fce883', hp: 100, radius: 35, speed: 4.0, src: 'sword.png' },
+        'Spear':  { color: '#5dd1b2', hp: 80,  radius: 25, speed: 6.0, src: 'spear.png' },
+        'Axe':    { color: '#e67e22', hp: 150, radius: 45, speed: 2.5, src: 'axe.png' },
+        'Hammer': { color: '#a855f7', hp: 200, radius: 55, speed: 2.0, src: 'hammer.png' },
+        'Dagger': { color: '#10b981', hp: 60,  radius: 20, speed: 7.0, src: 'dagger.png' },
+        'Scythe': { color: '#e11d48', hp: 120, radius: 40, speed: 3.5, src: 'scythe.png' }
     };
 
     let player1Choice = null;
@@ -209,7 +249,7 @@ canvas {
             player1Choice = type;
             highlightCard(cards, type, 'p1-selected');
             status.innerText = "Player 2: Choose your fighter";
-            status.style.color = "#3b82f6";
+            status.style.color = "#ff7b00";
         } else if (!player2Choice && player1Choice !== type) {
             player2Choice = type;
             highlightCard(cards, type, 'p2-selected');
@@ -237,7 +277,7 @@ canvas {
         });
         const status = document.getElementById('statusText');
         status.innerText = "Player 1: Choose your fighter";
-        status.style.color = "#e2e8f0";
+        status.style.color = "#00f3ff";
         document.getElementById('startBtn').classList.remove('ready');
     }
 
@@ -259,9 +299,12 @@ canvas {
     function startGame() {
         if (!player1Choice || !player2Choice) return;
         document.getElementById('menu').style.display = 'none';
-        document.getElementById('gameCanvas').style.display = 'block';
+        document.getElementById('gameUI').style.display = 'flex';
         document.getElementById('restartBtn').style.display = 'block';
         
+        document.getElementById('p1Label').innerText = "P1 - " + player1Choice.toUpperCase();
+        document.getElementById('p2Label').innerText = "P2 - " + player2Choice.toUpperCase();
+
         hitSound.play().then(() => {
             hitSound.pause();
             hitSound.currentTime = 0;
@@ -330,6 +373,7 @@ canvas {
             this.mass = radius;
             this.color = color;
             this.health = health;
+            this.maxHealth = health;
             this.type = type;
             this.img = new Image();
             this.img.src = src;
@@ -596,6 +640,14 @@ canvas {
                             balls[i].damage += 0.5;
                         } else if (balls[i].type === 'Axe') {
                             balls[i].health += 5;
+                        } else if (balls[i].type === 'Hammer') {
+                            balls[j].spinSpeed *= 0.5;
+                            balls[j].weaponCooldown = 60;
+                        } else if (balls[i].type === 'Dagger') {
+                            balls[j].iframes = 10;
+                        } else if (balls[i].type === 'Scythe') {
+                            balls[i].radius += 1;
+                            balls[i].mass = balls[i].radius;
                         }
                     }
                 }
@@ -607,6 +659,15 @@ canvas {
         requestAnimationFrame(animate);
 
         if (isPaused) return;
+
+        if (p1Ball) {
+            let p1Pct = Math.max(0, (p1Ball.health / p1Ball.maxHealth) * 100);
+            document.getElementById('p1HealthBar').style.width = p1Pct + '%';
+        }
+        if (p2Ball) {
+            let p2Pct = Math.max(0, (p2Ball.health / p2Ball.maxHealth) * 100);
+            document.getElementById('p2HealthBar').style.width = p2Pct + '%';
+        }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -624,15 +685,15 @@ canvas {
                 ball.draw();
             });
 
-            ctx.fillStyle = '#000';
-            ctx.font = 'bold 50px Arial';
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 50px Orbitron';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
             if (balls.length === 1) {
                 ctx.fillText(balls[0].type + ' WINS!', canvas.width / 2, canvas.height / 2 - 40);
                 ctx.fillStyle = balls[0].color;
-                ctx.font = 'bold 30px Arial';
+                ctx.font = 'bold 30px Orbitron';
                 ctx.fillText(Math.floor(balls[0].health) + ' HP LEFT', canvas.width / 2, canvas.height / 2 + 30);
             } else {
                 ctx.fillText('DOUBLE KO!', canvas.width / 2, canvas.height / 2);
