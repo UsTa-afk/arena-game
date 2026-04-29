@@ -243,7 +243,6 @@ canvas {
     function selectWeapon(type) {
         const cards = document.querySelectorAll('.weapon-card');
         const status = document.getElementById('statusText');
-        const startBtn = document.getElementById('startBtn');
 
         if (!player1Choice) {
             player1Choice = type;
@@ -253,12 +252,10 @@ canvas {
         } else if (!player2Choice && player1Choice !== type) {
             player2Choice = type;
             highlightCard(cards, type, 'p2-selected');
-            status.innerText = "Ready to Fight!";
+            status.innerHTML = "Ready! Press ENTER to Fight (or ESC to Reset)";
             status.style.color = "#22c55e";
-            startBtn.classList.add('ready');
         }
     }
-
     function highlightCard(cards, type, cssClass) {
         cards.forEach(card => {
             if(card.innerText.includes(type)) {
@@ -323,9 +320,15 @@ canvas {
     let p1Ball = null;
     let p2Ball = null;
 
-    window.addEventListener('keydown', (e) => {
+   window.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.shiftKey) {
             isPaused = !isPaused;
+        }
+        if (e.key === 'Enter') {
+            startGame();
+        }
+        if (e.key === 'Escape') {
+            resetSelection();
         }
     });
 
