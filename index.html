@@ -389,7 +389,7 @@ canvas {
             this.weaponCooldown = 0;
         }
 
-        draw() {
+draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             ctx.fillStyle = (this.iframes > 0 && Math.floor(Date.now() / 100) % 2 === 0) ? '#fff' : this.color;
@@ -412,10 +412,22 @@ canvas {
 
             const drawOffset = this.radius + 5;
 
-         if (this.img.complete && this.img.naturalWidth !== 0) {
-                let imgRatio = this.img.naturalHeight / this.img.naturalWidth;
-                let drawHeight = this.wLength * imgRatio;
-                ctx.drawImage(this.img, drawOffset, -drawHeight / 2, this.wLength, drawHeight);
+            if (this.img.complete && this.img.naturalWidth !== 0) {
+                ctx.translate(drawOffset + this.wLength / 2, 0);
+                let isVertical = this.img.naturalHeight > this.img.naturalWidth;
+                let drawW, drawH;
+                if (isVertical) {
+                    ctx.rotate(Math.PI / 2);
+                    let ratio = this.img.naturalWidth / this.img.naturalHeight;
+                    drawH = this.wLength;
+                    drawW = this.wLength * ratio;
+                    ctx.drawImage(this.img, -drawW / 2, -drawH / 2, drawW, drawH);
+                } else {
+                    let ratio = this.img.naturalHeight / this.img.naturalWidth;
+                    drawW = this.wLength;
+                    drawH = this.wLength * ratio;
+                    ctx.drawImage(this.img, -drawW / 2, -drawH / 2, drawW, drawH);
+                }
             } else {
                 ctx.fillStyle = '#333';
                 ctx.fillRect(drawOffset, -this.wWidth / 2, this.wLength, this.wWidth);
