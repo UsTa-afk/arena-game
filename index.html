@@ -412,8 +412,10 @@ canvas {
 
             const drawOffset = this.radius + 5;
 
-            if (this.img.complete && this.img.naturalWidth !== 0) {
-                ctx.drawImage(this.img, drawOffset, -this.wWidth / 2, this.wLength, this.wWidth);
+         if (this.img.complete && this.img.naturalWidth !== 0) {
+                let imgRatio = this.img.naturalHeight / this.img.naturalWidth;
+                let drawHeight = this.wLength * imgRatio;
+                ctx.drawImage(this.img, drawOffset, -drawHeight / 2, this.wLength, drawHeight);
             } else {
                 ctx.fillStyle = '#333';
                 ctx.fillRect(drawOffset, -this.wWidth / 2, this.wLength, this.wWidth);
