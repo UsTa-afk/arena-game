@@ -114,7 +114,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 100</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-yellow-400 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold">Speed: Fast</div>
+                <div class="text-xs font-semibold leading-tight">On hit: +1 dmg, +spin speed</div>
             </div>
         </article>
 
@@ -128,7 +128,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 80</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-cyan-400 h-1.5 rounded-full" style="width: 80%"></div></div>
                 </div>
-                <div class="text-xs font-semibold">Special: Reach</div>
+                <div class="text-xs font-semibold leading-tight">On hit: +0.5 dmg, longer reach</div>
             </div>
         </article>
 
@@ -142,7 +142,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 150</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-orange-500 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold">Special: Lifesteal</div>
+                <div class="text-xs font-semibold leading-tight">Hidden crit (7.5% × 5, scales)</div>
             </div>
         </article>
 
@@ -156,7 +156,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 200</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-purple-500 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold">Special: Stun</div>
+                <div class="text-xs font-semibold leading-tight">Pause → spin attack stuns 3s</div>
             </div>
         </article>
 
@@ -170,7 +170,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 60</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width: 60%"></div></div>
                 </div>
-                <div class="text-xs font-semibold">Special: Fast Hits</div>
+                <div class="text-xs font-semibold leading-tight">Throws weapon, copies foe 5s</div>
             </div>
         </article>
 
@@ -184,7 +184,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 120</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-rose-500 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold">Special: Grow</div>
+                <div class="text-xs font-semibold leading-tight">On hit: bleed + slow, +DPS</div>
             </div>
         </article>
     </section>
@@ -207,6 +207,7 @@ canvas {
                 <div class="h-6 w-full bg-slate-800/50 rounded-full overflow-hidden neon-box-blue p-1 health-bar-container">
                     <div id="p1HealthBar" class="h-full w-full bg-cyan-400 rounded-full shadow-[0_0_10px_#00f3ff]" style="width: 100%"></div>
                 </div>
+                <div id="p1Info" class="text-cyan-300 text-xs font-orbitron tracking-wider mt-1"></div>
             </div>
             <div class="text-5xl font-black italic flex items-center justify-center mt-6">
                 <span class="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">VS</span>
@@ -216,6 +217,7 @@ canvas {
                 <div class="h-6 w-full bg-slate-800/50 rounded-full overflow-hidden neon-box-orange p-1 flex justify-end health-bar-container-reverse">
                     <div id="p2HealthBar" class="h-full w-full bg-orange-500 rounded-full shadow-[0_0_10px_#ff7b00]" style="width: 100%"></div>
                 </div>
+                <div id="p2Info" class="text-orange-300 text-xs font-orbitron tracking-wider mt-1"></div>
             </div>
         </div>
     </header>
@@ -230,11 +232,11 @@ canvas {
 <script>
     const weaponStats = {
         'Sword':  { color: '#fce883', hp: 100, radius: 35, speed: 4.0, src: 'sword.png' },
-        'Spear':  { color: '#5dd1b2', hp: 80,  radius: 35, speed: 6.0, src: 'spear.png' },
-        'Axe':    { color: '#e67e22', hp: 150, radius: 35, speed: 2.5, src: 'axe.png' },
-        'Hammer': { color: '#a855f7', hp: 200, radius: 35, speed: 2.0, src: 'hammer.png' },
-        'Dagger': { color: '#10b981', hp: 60,  radius: 30, speed: 7.0, src: 'dagger.png' },
-        'Scythe': { color: '#e11d48', hp: 120, radius: 35, speed: 3.5, src: 'scythe.png' }
+        'Spear':  { color: '#5dd1b2', hp: 100,  radius: 35, speed: 6.0, src: 'spear.png' },
+        'Axe':    { color: '#e67e22', hp: 100, radius: 35, speed: 2.5, src: 'axe.png' },
+        'Hammer': { color: '#a855f7', hp: 100, radius: 35, speed: 2.0, src: 'hammer.png' },
+        'Dagger': { color: '#10b981', hp: 100,  radius: 30, speed: 7.0, src: 'dagger.png' },
+        'Scythe': { color: '#e11d48', hp: 100, radius: 35, speed: 3.5, src: 'scythe.png' }
     };
 
     let player1Choice = null;
@@ -315,8 +317,9 @@ canvas {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     let isPaused = false;
-    let balls = []; 
+    let balls = [];
     let particles = [];
+    let daggerProjectiles = [];
     let p1Ball = null;
     let p2Ball = null;
 
@@ -371,40 +374,133 @@ canvas {
             this.x = x;
             this.y = y;
             this.radius = radius;
+            this.baseRadius = radius;
             this.dx = dx;
             this.dy = dy;
             this.mass = radius;
             this.color = color;
+            this.baseColor = color;
             this.health = health;
             this.maxHealth = health;
             this.type = type;
+            this.baseType = type;
             this.img = new Image();
             this.img.src = src;
+            this.baseImg = this.img;
             this.angle = 0;
             this.spinSpeed = (Math.random() * 0.05) + 0.05;
+            this.baseSpinSpeed = this.spinSpeed;
             this.wLength = radius * 2.5;
+            this.baseWLength = this.wLength;
             this.wWidth = radius * 0.6;
+            this.baseWWidth = this.wWidth;
             this.iframes = 0;
             this.damage = 1;
+            this.baseDamage = 1;
             this.weaponCooldown = 0;
+
+            // Universal effect timers (60fps; 60 = 1s)
+            this.slowTimer = 0;
+            this.slowFactor = 1;
+            this.stunTimer = 0;
+            this.weaponLockTimer = 0;
+            this.weaponDisabledTimer = 0;
+            this.bleedTimer = 0;
+            this.bleedDmgPerFrame = 0;
+
+            // Type-specific state
+            if (type === 'Axe') {
+                this.critChance = 0.075;
+                this.critMult = 5;
+            }
+            if (type === 'Hammer') {
+                this.hammerPhase = 'moving'; // cycles every 4s: moving 3.25s -> pausing 0.5s -> spinning 0.25s
+                this.hammerTimer = 195;
+                this.savedSpinSpeed = this.spinSpeed;
+                this.savedDx = dx;
+                this.savedDy = dy;
+            }
+            if (type === 'Dagger') {
+                this.radius = 25;
+                this.baseRadius = 25;
+                this.mass = 25;
+                this.wLength = this.radius * 2.2;
+                this.baseWLength = this.wLength;
+                this.wWidth = this.radius * 0.5;
+                this.baseWWidth = this.wWidth;
+                this.hasWeapon = true;
+                this.throwCooldown = 120; // 2s
+                this.transformTimer = 0;
+            }
+            if (type === 'Scythe') {
+                this.bleedDPS = 0.1;
+            }
         }
 
-draw() {
+        draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = (this.iframes > 0 && Math.floor(Date.now() / 100) % 2 === 0) ? '#fff' : this.color;
+            const flash = this.iframes > 0 && Math.floor(Date.now() / 100) % 2 === 0;
+            ctx.fillStyle = flash ? '#fff' : this.color;
             ctx.fill();
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#000';
             ctx.stroke();
             ctx.closePath();
 
-            ctx.fillStyle = '#000';
+            // Status indicator rings
+            if (this.bleedTimer > 0) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius + 3, 0, Math.PI * 2);
+                ctx.strokeStyle = '#b91c1c';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            if (this.stunTimer > 0) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius + 6, 0, Math.PI * 2);
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            if (this.weaponDisabledTimer > 0) {
+                ctx.save();
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius + 9, 0, Math.PI * 2);
+                ctx.strokeStyle = '#a855f7';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.fillStyle = (this.baseType === 'Dagger' && this.transformTimer > 0) ? '#fff' : '#000';
             let fontSize = Math.floor(this.radius * 0.7);
             ctx.font = 'bold ' + fontSize + 'px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(Math.max(0, Math.floor(this.health)), this.x, this.y);
+
+            // Dagger aim line: show during last ~0.5s before throw
+            if (this.baseType === 'Dagger' && this.type === 'Dagger'
+                && this.hasWeapon && this.throwCooldown > 0 && this.throwCooldown <= 30) {
+                const opp = this.getOpponent();
+                if (opp) {
+                    ctx.save();
+                    ctx.strokeStyle = this.color;
+                    ctx.globalAlpha = 0.55;
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([4, 6]);
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(opp.x, opp.y);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            // Dagger has no weapon attached while it is thrown
+            if (this.baseType === 'Dagger' && this.type === 'Dagger' && !this.hasWeapon) return;
 
             ctx.save();
             ctx.translate(this.x, this.y);
@@ -438,6 +534,45 @@ draw() {
         }
 
         update() {
+            // Hammer cycle: moving -> pausing -> spinning -> moving ...
+            // Also runs while a Dagger has transformed into a Hammer.
+            const abilityType = this.transformTimer > 0 ? this.type : this.baseType;
+            if (abilityType === 'Hammer') {
+                this.hammerTimer--;
+                if (this.hammerTimer <= 0) {
+                    if (this.hammerPhase === 'moving') {
+                        this.hammerPhase = 'pausing';
+                        this.hammerTimer = 30; // 0.5 sec stationary
+                        this.savedDx = this.dx;
+                        this.savedDy = this.dy;
+                        this.dx = 0;
+                        this.dy = 0;
+                        this.savedSpinSpeed = this.spinSpeed;
+                        this.spinSpeed = 0;
+                    } else if (this.hammerPhase === 'pausing') {
+                        this.hammerPhase = 'spinning';
+                        this.hammerTimer = 15; // 0.25 sec fast spin
+                        const sign = this.savedSpinSpeed >= 0 ? 1 : -1;
+                        this.spinSpeed = sign * (2 * Math.PI) / 15;
+                    } else if (this.hammerPhase === 'spinning') {
+                        this.hammerPhase = 'moving';
+                        this.hammerTimer = 195; // 3.25 sec normal movement; cycle = 4s total
+                        this.spinSpeed = this.savedSpinSpeed;
+                        if (this.savedDx === 0 && this.savedDy === 0) {
+                            this.dx = Math.random() > 0.5 ? 2 : -2;
+                            this.dy = Math.random() > 0.5 ? 2 : -2;
+                        } else {
+                            this.dx = this.savedDx;
+                            this.dy = this.savedDy;
+                        }
+                    }
+                }
+            }
+
+            let moveMult = 1;
+            if (this.stunTimer > 0) moveMult = 0;
+            else if (this.slowTimer > 0) moveMult = this.slowFactor;
+
             if (this.x + this.radius > canvas.width) {
                 this.x = canvas.width - this.radius;
                 this.dx = -this.dx;
@@ -445,7 +580,6 @@ draw() {
                 this.x = this.radius;
                 this.dx = -this.dx;
             }
-
             if (this.y + this.radius > canvas.height) {
                 this.y = canvas.height - this.radius;
                 this.dy = -this.dy;
@@ -454,12 +588,104 @@ draw() {
                 this.dy = -this.dy;
             }
 
-            this.x += this.dx;
-            this.y += this.dy;
-            this.angle += this.spinSpeed;
+            this.x += this.dx * moveMult;
+            this.y += this.dy * moveMult;
+
+            if (this.weaponLockTimer <= 0) {
+                this.angle += this.spinSpeed;
+            }
 
             if (this.iframes > 0) this.iframes--;
             if (this.weaponCooldown > 0) this.weaponCooldown--;
+            if (this.slowTimer > 0) {
+                this.slowTimer--;
+                if (this.slowTimer === 0) this.slowFactor = 1;
+            }
+            if (this.stunTimer > 0) this.stunTimer--;
+            if (this.weaponLockTimer > 0) this.weaponLockTimer--;
+            if (this.weaponDisabledTimer > 0) this.weaponDisabledTimer--;
+
+            if (this.bleedTimer > 0) {
+                this.health -= this.bleedDmgPerFrame;
+                this.bleedTimer--;
+            }
+
+            // Dagger transformation timer
+            if (this.baseType === 'Dagger' && this.transformTimer > 0) {
+                this.transformTimer--;
+                if (this.transformTimer === 0) {
+                    this.type = 'Dagger';
+                    this.color = this.baseColor;
+                    this.radius = this.baseRadius;
+                    this.mass = this.baseRadius;
+                    this.img = this.baseImg;
+                    this.wLength = this.baseWLength;
+                    this.wWidth = this.baseWWidth;
+                    this.damage = this.baseDamage;
+                    this.spinSpeed = this.baseSpinSpeed;
+                    this.throwCooldown = 120;
+                    // Clear copied ability state so old fields don't linger
+                    this.hammerPhase = undefined;
+                    this.hammerTimer = undefined;
+                    this.critChance = undefined;
+                    this.critMult = undefined;
+                    this.bleedDPS = undefined;
+                    // Resume movement if hammer cycle had frozen us
+                    if (this.dx === 0 && this.dy === 0) {
+                        this.dx = Math.random() > 0.5 ? 4 : -4;
+                        this.dy = (Math.random() * 4) - 2;
+                    }
+                }
+            }
+
+            // Dagger throw cycle (only while truly a dagger, not transformed)
+            if (this.baseType === 'Dagger' && this.type === 'Dagger' && this.transformTimer === 0 && this.hasWeapon) {
+                if (this.throwCooldown > 0) {
+                    this.throwCooldown--;
+                    if (this.throwCooldown === 0) {
+                        this.throwWeapon();
+                    }
+                }
+            }
+        }
+
+        getOpponent() {
+            for (const b of balls) {
+                if (b !== this && b.health > 0) return b;
+            }
+            return null;
+        }
+
+        throwWeapon() {
+            const opp = this.getOpponent();
+            const aimAngle = opp
+                ? Math.atan2(opp.y - this.y, opp.x - this.x)
+                : this.angle;
+            const orbitDist = this.radius + 5 + this.wLength / 2;
+            const wx = this.x + Math.cos(aimAngle) * orbitDist;
+            const wy = this.y + Math.sin(aimAngle) * orbitDist;
+            const speed = 10;
+            const dxv = Math.cos(aimAngle) * speed;
+            const dyv = Math.sin(aimAngle) * speed;
+            daggerProjectiles.push({
+                x: wx,
+                y: wy,
+                dx: dxv,
+                dy: dyv,
+                angle: aimAngle,
+                owner: this,
+                wLength: this.wLength,
+                wWidth: this.wWidth,
+                stuck: false,
+                img: this.img,
+                color: this.color
+            });
+            this.hasWeapon = false;
+        }
+
+        retrieveWeapon() {
+            this.hasWeapon = true;
+            this.throwCooldown = 180;
         }
     }
 
@@ -596,80 +822,288 @@ draw() {
         return doPolygonsIntersect(poly1, poly2);
     }
 
+    function abilityOf(b) {
+        return b.transformTimer > 0 ? b.type : b.baseType;
+    }
+
+    function hasUsableWeapon(b) {
+        if (b.weaponDisabledTimer > 0) return false;
+        if (b.weaponLockTimer > 0) return false;
+        if (b.baseType === 'Dagger' && !b.hasWeapon) return false;
+        return true;
+    }
+
     function checkCollisions() {
+        // Ball-vs-ball physical collisions
         for (let i = 0; i < balls.length; i++) {
             for (let j = i + 1; j < balls.length; j++) {
                 const dx = balls[i].x - balls[j].x;
                 const dy = balls[i].y - balls[j].y;
                 const distance = Math.hypot(dx, dy);
-
                 if (distance < balls[i].radius + balls[j].radius) {
                     resolveCollision(balls[i], balls[j]);
                 }
             }
         }
 
+        // Weapon-vs-weapon clashes
         for (let i = 0; i < balls.length; i++) {
             for (let j = i + 1; j < balls.length; j++) {
-                if (checkWeaponVsWeapon(balls[i], balls[j])) {
-                    balls[i].spinSpeed *= -1;
-                    balls[j].spinSpeed *= -1;
-                    balls[i].weaponCooldown = 15;
-                    balls[j].weaponCooldown = 15;
-                    
+                const a = balls[i];
+                const b = balls[j];
+                if (!hasUsableWeapon(a) || !hasUsableWeapon(b)) continue;
+                if (a.weaponCooldown > 0 || b.weaponCooldown > 0) continue;
+
+                if (checkWeaponVsWeapon(a, b)) {
+                    a.spinSpeed *= -1;
+                    b.spinSpeed *= -1;
+                    a.weaponCooldown = 15;
+                    b.weaponCooldown = 15;
+
                     playHitSound();
                     triggerShake();
-                    
-                    const orbitDist1 = balls[i].radius + 5 + balls[i].wLength / 2;
-                    const wx1 = balls[i].x + Math.cos(balls[i].angle) * orbitDist1;
-                    const wy1 = balls[i].y + Math.sin(balls[i].angle) * orbitDist1;
-                    
-                    const orbitDist2 = balls[j].radius + 5 + balls[j].wLength / 2;
-                    const wx2 = balls[j].x + Math.cos(balls[j].angle) * orbitDist2;
-                    const wy2 = balls[j].y + Math.sin(balls[j].angle) * orbitDist2;
 
-                    const clashX = (wx1 + wx2) / 2;
-                    const clashY = (wy1 + wy2) / 2;
+                    const orbitDistA = a.radius + 5 + a.wLength / 2;
+                    const wxA = a.x + Math.cos(a.angle) * orbitDistA;
+                    const wyA = a.y + Math.sin(a.angle) * orbitDistA;
+                    const orbitDistB = b.radius + 5 + b.wLength / 2;
+                    const wxB = b.x + Math.cos(b.angle) * orbitDistB;
+                    const wyB = b.y + Math.sin(b.angle) * orbitDistB;
+                    spawnParticles((wxA + wxB) / 2, (wyA + wyB) / 2, '#ffffff');
 
-                    spawnParticles(clashX, clashY, '#ffffff');
-                }
-            }
-        }
-
-        for (let i = 0; i < balls.length; i++) {
-            for (let j = 0; j < balls.length; j++) {
-                if (i !== j) {
-                    if (checkWeaponHit(balls[i], balls[j])) {
-                        balls[j].health -= balls[i].damage;
-                        balls[j].iframes = 30;
-                        playHitSound();
-                        triggerShake();
-                        spawnParticles(balls[j].x, balls[j].y, balls[j].color);
-
-                        if (balls[i].type === 'Sword') {
-                            let sign = balls[i].spinSpeed < 0 ? -1 : 1;
-                            let currentPeriod = (2 * Math.PI) / (Math.abs(balls[i].spinSpeed) * 60);
-                            let newPeriod = currentPeriod - 0.01;
-                            if (newPeriod < 0.05) newPeriod = 0.05;
-                            balls[i].spinSpeed = sign * ((2 * Math.PI) / (newPeriod * 60));
-                        } else if (balls[i].type === 'Spear') {
-                            balls[i].wLength += 5.5;
-                            balls[i].damage += 0.5;
-                        } else if (balls[i].type === 'Axe') {
-                            balls[i].health += 5;
-                        } else if (balls[i].type === 'Hammer') {
-                            balls[j].spinSpeed *= 0.5;
-                            balls[j].weaponCooldown = 60;
-                        } else if (balls[i].type === 'Dagger') {
-                            balls[j].iframes = 10;
-                        } else if (balls[i].type === 'Scythe') {
-                            balls[i].radius += 1;
-                            balls[i].mass = balls[i].radius;
-                        }
+                    // Hammer fast-spin clash disables opponent's weapon for 3s
+                    if (abilityOf(a) === 'Hammer' && a.hammerPhase === 'spinning') {
+                        b.weaponDisabledTimer = 180;
+                    }
+                    if (abilityOf(b) === 'Hammer' && b.hammerPhase === 'spinning') {
+                        a.weaponDisabledTimer = 180;
                     }
                 }
             }
         }
+
+        // Weapon-vs-ball hits
+        for (let i = 0; i < balls.length; i++) {
+            for (let j = 0; j < balls.length; j++) {
+                if (i === j) continue;
+                const attacker = balls[i];
+                const defender = balls[j];
+
+                if (!hasUsableWeapon(attacker)) continue;
+                const attAb = abilityOf(attacker);
+                // Hammer only deals damage during its fast-spin phase
+                if (attAb === 'Hammer' && attacker.hammerPhase !== 'spinning') continue;
+
+                if (!checkWeaponHit(attacker, defender)) continue;
+
+                let damageDealt = attacker.damage;
+
+                // Axe: damage to balls is always 1, with hidden crit
+                if (attAb === 'Axe') {
+                    damageDealt = 1;
+                    let crit = false;
+                    if (Math.random() < attacker.critChance) {
+                        damageDealt = attacker.critMult;
+                        crit = true;
+                    }
+                    attacker.critChance += 0.01;
+                    attacker.critMult += 1;
+                    if (crit) {
+                        spawnParticles(defender.x, defender.y, '#ff2020');
+                        spawnParticles(defender.x, defender.y, '#ffd700');
+                    }
+                }
+
+                defender.health -= damageDealt;
+                defender.iframes = 30;
+                playHitSound();
+                triggerShake();
+                spawnParticles(defender.x, defender.y, defender.color);
+
+                // Sword: spin speed +1 (scaled), damage +1
+                if (attAb === 'Sword') {
+                    const sign = attacker.spinSpeed < 0 ? -1 : 1;
+                    attacker.spinSpeed += sign * 0.02;
+                    attacker.damage += 1;
+                }
+
+                // Spear: hitbox length +1, damage +0.5
+                if (attAb === 'Spear') {
+                    attacker.wLength += 5;
+                    attacker.damage += 0.5;
+                }
+
+                // Hammer (spinning direct hit): damage +2, opponent stunned & weapon locked 3s
+                if (attAb === 'Hammer' && attacker.hammerPhase === 'spinning') {
+                    attacker.damage += 2;
+                    defender.stunTimer = 180;
+                    defender.weaponLockTimer = 180;
+                }
+
+                // Scythe: applies bleed (slow + DoT 5s), bleed dps +0.2 per scythe hit
+                if (attAb === 'Scythe') {
+                    defender.bleedTimer = 300; // 5 sec
+                    defender.bleedDmgPerFrame = attacker.bleedDPS / 60;
+                    defender.slowTimer = 60;
+                    defender.slowFactor = 0.5;
+                    attacker.bleedDPS += 0.1; // does NOT trigger from bleed tick damage
+                }
+            }
+        }
+    }
+
+    function updateDaggerProjectiles() {
+        for (let i = daggerProjectiles.length - 1; i >= 0; i--) {
+            const proj = daggerProjectiles[i];
+
+            // Remove orphaned projectiles
+            if (!proj.owner || proj.owner.health <= 0) {
+                daggerProjectiles.splice(i, 1);
+                continue;
+            }
+
+            if (!proj.stuck) {
+                proj.x += proj.dx;
+                proj.y += proj.dy;
+
+                // Check hit on any non-owner ball
+                let hit = null;
+                for (const b of balls) {
+                    if (b === proj.owner) continue;
+                    if (b.iframes > 0) continue;
+                    const dist = Math.hypot(proj.x - b.x, proj.y - b.y);
+                    if (dist < b.radius) {
+                        hit = b;
+                        break;
+                    }
+                }
+
+                if (hit) {
+                    // Throw damage equals opponent's current damage
+                    const throwDmg = hit.damage;
+                    hit.health -= throwDmg;
+                    hit.iframes = 30;
+                    playHitSound();
+                    triggerShake();
+                    spawnParticles(hit.x, hit.y, hit.color);
+
+                    // Transform dagger: copy all features, double damage & spin, color = black
+                    const owner = proj.owner;
+                    owner.type = hit.type;
+                    owner.color = '#000000';
+                    owner.radius = hit.radius;
+                    owner.mass = hit.radius;
+                    owner.img = hit.img;
+                    owner.wLength = hit.wLength;
+                    owner.wWidth = hit.wWidth;
+                    owner.damage = hit.damage * 2;
+                    owner.spinSpeed = hit.spinSpeed * 2;
+                    owner.transformTimer = 480; // 8s
+                    owner.hasWeapon = true;
+
+                    // Copy type-specific state so all abilities transfer
+                    if (hit.baseType === 'Axe') {
+                        owner.critChance = hit.critChance;
+                        owner.critMult = hit.critMult;
+                    } else if (hit.baseType === 'Hammer') {
+                        owner.hammerPhase = 'moving';
+                        owner.hammerTimer = 195;
+                        owner.savedSpinSpeed = owner.spinSpeed;
+                        owner.savedDx = owner.dx;
+                        owner.savedDy = owner.dy;
+                    } else if (hit.baseType === 'Scythe') {
+                        owner.bleedDPS = hit.bleedDPS;
+                    }
+
+                    daggerProjectiles.splice(i, 1);
+                    continue;
+                }
+
+                // Border check -> stick. Use half the weapon length as margin so
+                // the full weapon stays inside the canvas (otherwise it gets
+                // visually clipped at the edge and appears to disappear).
+                const margin = proj.wLength / 2;
+                if (proj.x < margin || proj.x > canvas.width - margin
+                    || proj.y < margin || proj.y > canvas.height - margin) {
+                    proj.x = Math.max(margin, Math.min(canvas.width - margin, proj.x));
+                    proj.y = Math.max(margin, Math.min(canvas.height - margin, proj.y));
+                    proj.dx = 0;
+                    proj.dy = 0;
+                    proj.stuck = true;
+                }
+            } else {
+                // Owner picks weapon back up when reaching it
+                const dist = Math.hypot(proj.x - proj.owner.x, proj.y - proj.owner.y);
+                if (dist < proj.owner.radius + 15) {
+                    proj.owner.retrieveWeapon();
+                    daggerProjectiles.splice(i, 1);
+                }
+            }
+        }
+    }
+
+    function drawDaggerProjectiles() {
+        daggerProjectiles.forEach(proj => {
+            ctx.save();
+            ctx.translate(proj.x, proj.y);
+            ctx.rotate(proj.angle);
+            if (proj.img && proj.img.complete && proj.img.naturalWidth !== 0) {
+                let isVertical = proj.img.naturalHeight > proj.img.naturalWidth;
+                let drawW, drawH;
+                if (isVertical) {
+                    ctx.rotate(Math.PI / 2);
+                    let ratio = proj.img.naturalWidth / proj.img.naturalHeight;
+                    drawH = proj.wLength;
+                    drawW = proj.wLength * ratio;
+                    ctx.drawImage(proj.img, -drawW / 2, -drawH / 2, drawW, drawH);
+                } else {
+                    let ratio = proj.img.naturalHeight / proj.img.naturalWidth;
+                    drawW = proj.wLength;
+                    drawH = proj.wLength * ratio;
+                    ctx.drawImage(proj.img, -drawW / 2, -drawH / 2, drawW, drawH);
+                }
+            } else {
+                ctx.fillStyle = proj.color || '#888';
+                ctx.fillRect(-proj.wLength / 2, -proj.wWidth / 2, proj.wLength, proj.wWidth);
+            }
+            ctx.restore();
+        });
+    }
+
+    function fmtNum(n) {
+        return Number.isInteger(n) ? String(n) : n.toFixed(1);
+    }
+
+    function formatInfo(b) {
+        if (!b) return '';
+        const dmg = fmtNum(b.damage);
+        if (b.baseType === 'Axe' && b.type === 'Axe') {
+            const ch = (b.critChance * 100).toFixed(1);
+            return `DMG 1 • CRIT ${ch}% ×${b.critMult}`;
+        }
+        if (b.baseType === 'Spear' && b.type === 'Spear') {
+            return `DMG ${dmg} • REACH ${Math.round(b.wLength)}`;
+        }
+        if (b.baseType === 'Scythe' && b.type === 'Scythe') {
+            return `DMG ${dmg} • BLEED ${fmtNum(b.bleedDPS)}/s`;
+        }
+        if (b.baseType === 'Hammer' && b.type === 'Hammer') {
+            const phaseShort = b.hammerPhase === 'spinning' ? 'SPIN'
+                             : b.hammerPhase === 'pausing' ? 'CHARGE' : 'MOVE';
+            return `DMG ${dmg} • ${phaseShort}`;
+        }
+        if (b.baseType === 'Dagger') {
+            if (b.type !== 'Dagger') {
+                return `${b.type.toUpperCase()} DMG ${dmg} (${(b.transformTimer/60).toFixed(1)}s)`;
+            }
+            if (!b.hasWeapon) return `DMG ${dmg} • WEAPON OUT`;
+            return `DMG ${dmg} • THROW ${(b.throwCooldown/60).toFixed(1)}s`;
+        }
+        if (b.baseType === 'Sword' && b.type === 'Sword') {
+            const rps = (Math.abs(b.spinSpeed) * 60 / (2 * Math.PI)).toFixed(1);
+            return `DMG ${dmg} • SPIN ${rps}/s`;
+        }
+        return `DMG ${dmg}`;
     }
 
     function animate() {
@@ -680,10 +1114,12 @@ draw() {
         if (p1Ball) {
             let p1Pct = Math.max(0, (p1Ball.health / p1Ball.maxHealth) * 100);
             document.getElementById('p1HealthBar').style.width = p1Pct + '%';
+            document.getElementById('p1Info').innerText = formatInfo(p1Ball);
         }
         if (p2Ball) {
             let p2Pct = Math.max(0, (p2Ball.health / p2Ball.maxHealth) * 100);
             document.getElementById('p2HealthBar').style.width = p2Pct + '%';
+            document.getElementById('p2Info').innerText = formatInfo(p2Ball);
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -706,22 +1142,25 @@ draw() {
             ctx.font = 'bold 50px Orbitron';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
+
             if (balls.length === 1) {
-                ctx.fillText(balls[0].type + ' WINS!', canvas.width / 2, canvas.height / 2 - 40);
+                ctx.fillText(balls[0].baseType.toUpperCase() + ' WINS!', canvas.width / 2, canvas.height / 2 - 40);
                 ctx.fillStyle = balls[0].color;
                 ctx.font = 'bold 30px Orbitron';
                 ctx.fillText(Math.floor(balls[0].health) + ' HP LEFT', canvas.width / 2, canvas.height / 2 + 30);
             } else {
                 ctx.fillText('DOUBLE KO!', canvas.width / 2, canvas.height / 2);
             }
-            return; 
+            return;
         }
 
         balls.forEach(ball => {
             ball.draw();
             ball.update();
         });
+
+        drawDaggerProjectiles();
+        updateDaggerProjectiles();
 
         checkCollisions();
         balls = balls.filter(ball => ball.health > 0);
