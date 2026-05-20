@@ -1164,6 +1164,43 @@ canvas {
 
         checkCollisions();
         balls = balls.filter(ball => ball.health > 0);
+        function mobilKontrolVeUyarla() {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
+        
+        if (isMobile) {
+            document.body.style.touchAction = 'none';
+
+            const status = document.getElementById('statusText');
+            const observer = new MutationObserver(() => {
+                if (status.innerText.includes('ENTER')) {
+                    status.innerHTML = "Ready! Tap empty space to Fight (2-Finger tap to Reset)";
+                }
+            });
+            if (status) observer.observe(status, { childList: true, subtree: true });
+
+            window.addEventListener('touchstart', (e) => {
+                if (document.getElementById('menu').style.display !== 'none') {
+                    if (e.touches.length === 2) {
+                        resetSelection();
+                    }
+                } else {
+                    if (e.touches.length === 3) {
+                        isPaused = !isPaused;
+                    }
+                }
+            });
+
+            window.addEventListener('touchend', (e) => {
+                if (document.getElementById('menu').style.display !== 'none' && player1Choice && player2Choice) {
+                    if (!e.target.closest('.weapon-card')) {
+                        startGame();
+                    }
+                }
+            });
+        }
+    }
+    
+    mobilKontrolVeUyarla();
     }
 </script>
 
