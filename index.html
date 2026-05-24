@@ -62,8 +62,12 @@ body::before {
 .neon-box-orange { box-shadow: 0 0 15px #ff7b00, inset 0 0 15px #ff7b00; border: 2px solid #ff7b00; }
 .neon-box-purple { box-shadow: 0 0 25px #a855f7, inset 0 0 15px #a855f7; border: 2px solid #a855f7; }
 
-.health-bar-container { clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%); transition: width 0.2s ease-out; }
-.health-bar-container-reverse { clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%); transition: width 0.2s ease-out; }
+.health-bar-container { transition: width 0.2s ease-out; }
+.health-bar-container-reverse { transition: width 0.2s ease-out; }
+
+#p1HealthBar, #p2HealthBar { transition: width 0.12s ease-out; }
+#p1DelayedBar, #p2DelayedBar { transition: width 0.55s cubic-bezier(0.33, 1, 0.68, 1) 0.12s; background-color: rgba(255, 255, 255, 0.55); }
+.status-icons { font-size: 14px; min-height: 18px; letter-spacing: 2px; }
 
 #gameUI { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 0.5rem; }
 
@@ -114,7 +118,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 100</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-yellow-400 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold leading-tight">On hit: +1 dmg, +spin speed</div>
+                <div class="text-xs font-semibold leading-tight">On hit: +1 damage (stacks)</div>
             </div>
         </article>
 
@@ -128,7 +132,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 100</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-cyan-400 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold leading-tight">On hit: +0.5 dmg, longer reach</div>
+                <div class="text-xs font-semibold leading-tight">On hit: +0.5 dmg & +reach</div>
             </div>
         </article>
 
@@ -142,7 +146,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 100</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-orange-500 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold leading-tight">Hidden crit (7.5% × 5, scales)</div>
+                <div class="text-xs font-semibold leading-tight">Hidden crit 7.5%×5, +1%/+2 per hit</div>
             </div>
         </article>
 
@@ -156,7 +160,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 100</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-purple-500 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold leading-tight">Pause → spin attack stuns 3s</div>
+                <div class="text-xs font-semibold leading-tight">4s cycle: charge → 2× spin, stun 3s</div>
             </div>
         </article>
 
@@ -170,7 +174,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 100</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold leading-tight">Throws weapon, copies foe 5s</div>
+                <div class="text-xs font-semibold leading-tight">Throws, copies foe 8s (2× dmg)</div>
             </div>
         </article>
 
@@ -184,7 +188,7 @@ canvas {
                     <div class="flex justify-between text-xs font-semibold mb-1"><span>HP: 100</span></div>
                     <div class="w-full bg-slate-700 rounded-full h-1.5"><div class="bg-rose-500 h-1.5 rounded-full" style="width: 100%"></div></div>
                 </div>
-                <div class="text-xs font-semibold leading-tight">On hit: bleed + slow, +DPS</div>
+                <div class="text-xs font-semibold leading-tight">Bleed 5s + slow, +0.1 DPS/hit</div>
             </div>
         </article>
     </section>
@@ -204,8 +208,12 @@ canvas {
         <div class="flex w-full items-center justify-between gap-8">
             <div class="flex-1 flex flex-col gap-2">
                 <span id="p1Label" class="text-cyan-400 font-bold tracking-widest text-lg">P1</span>
+                <div id="p1Status" class="status-icons text-left text-yellow-300"></div>
                 <div class="h-6 w-full bg-slate-800/50 rounded-full overflow-hidden neon-box-blue p-1 health-bar-container">
-                    <div id="p1HealthBar" class="h-full w-full bg-cyan-400 rounded-full shadow-[0_0_10px_#00f3ff]" style="width: 100%"></div>
+                    <div class="relative h-full w-full">
+                        <div id="p1DelayedBar" class="absolute top-0 left-0 h-full rounded-full" style="width: 100%"></div>
+                        <div id="p1HealthBar" class="absolute top-0 left-0 h-full bg-cyan-400 rounded-full shadow-[0_0_10px_#00f3ff]" style="width: 100%"></div>
+                    </div>
                 </div>
                 <div id="p1Info" class="text-cyan-300 text-xs font-orbitron tracking-wider mt-1"></div>
             </div>
@@ -214,8 +222,12 @@ canvas {
             </div>
             <div class="flex-1 flex flex-col gap-2 text-right">
                 <span id="p2Label" class="text-orange-500 font-bold tracking-widest text-lg">P2</span>
-                <div class="h-6 w-full bg-slate-800/50 rounded-full overflow-hidden neon-box-orange p-1 flex justify-end health-bar-container-reverse">
-                    <div id="p2HealthBar" class="h-full w-full bg-orange-500 rounded-full shadow-[0_0_10px_#ff7b00]" style="width: 100%"></div>
+                <div id="p2Status" class="status-icons text-right text-yellow-300"></div>
+                <div class="h-6 w-full bg-slate-800/50 rounded-full overflow-hidden neon-box-orange p-1 health-bar-container-reverse">
+                    <div class="relative h-full w-full">
+                        <div id="p2DelayedBar" class="absolute top-0 right-0 h-full rounded-full" style="width: 100%"></div>
+                        <div id="p2HealthBar" class="absolute top-0 right-0 h-full bg-orange-500 rounded-full shadow-[0_0_10px_#ff7b00]" style="width: 100%"></div>
+                    </div>
                 </div>
                 <div id="p2Info" class="text-orange-300 text-xs font-orbitron tracking-wider mt-1"></div>
             </div>
@@ -320,8 +332,61 @@ canvas {
     let balls = [];
     let particles = [];
     let daggerProjectiles = [];
+    let floatingTexts = [];
     let p1Ball = null;
     let p2Ball = null;
+
+    class FloatingText {
+        constructor(x, y, text, color, big) {
+            this.x = x + (Math.random() - 0.5) * 18;
+            this.y = y;
+            this.text = text;
+            this.color = color;
+            this.alpha = 1;
+            this.dy = -2.2;
+            this.life = 55;
+            this.maxLife = 55;
+            this.big = !!big;
+        }
+        update() {
+            this.y += this.dy;
+            this.dy *= 0.94;
+            this.life--;
+            this.alpha = Math.max(0, this.life / this.maxLife);
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            const size = this.big ? 30 : 20;
+            ctx.font = 'bold ' + size + 'px Orbitron, Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#000';
+            ctx.strokeText(this.text, this.x, this.y);
+            ctx.fillStyle = this.color;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 12;
+            ctx.fillText(this.text, this.x, this.y);
+            ctx.restore();
+        }
+    }
+
+    function spawnFloatingText(x, y, dmg, isCrit) {
+        const text = '-' + Math.max(1, Math.round(dmg));
+        const color = isCrit ? '#ffd700' : '#ff5555';
+        floatingTexts.push(new FloatingText(x, y, text, color, isCrit));
+    }
+
+    function getStatusIcons(b) {
+        if (!b) return '';
+        let s = '';
+        if (b.stunTimer > 0) s += '⚡';
+        if (b.bleedTimer > 0) s += '🩸';
+        if (b.weaponDisabledTimer > 0) s += '⊘';
+        if (b.slowTimer > 0 && b.stunTimer <= 0) s += '🐌';
+        return s;
+    }
 
    window.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.shiftKey) {
@@ -399,6 +464,10 @@ canvas {
             this.baseDamage = 1;
             this.weaponCooldown = 0;
 
+            // Visual feedback state
+            this.trail = []; // recent positions for motion trail
+            this.delayedHealth = health; // for "delayed damage" bar (lerps toward health)
+
             // Universal effect timers (60fps; 60 = 1s)
             this.slowTimer = 0;
             this.slowFactor = 1;
@@ -438,11 +507,29 @@ canvas {
         }
 
         draw() {
+            // Motion trail behind the ball
+            for (let i = 0; i < this.trail.length; i++) {
+                const t = this.trail[i];
+                const k = (i + 1) / this.trail.length; // older = smaller index
+                ctx.save();
+                ctx.globalAlpha = 0.35 * k;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, this.radius * (0.35 + 0.6 * k), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Neon glow + ball body
+            ctx.save();
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 22;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             const flash = this.iframes > 0 && Math.floor(Date.now() / 100) % 2 === 0;
             ctx.fillStyle = flash ? '#fff' : this.color;
             ctx.fill();
+            ctx.restore();
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#000';
             ctx.stroke();
@@ -534,6 +621,17 @@ canvas {
         }
 
         update() {
+            // Push position into trail (sample every other frame to keep it sparse)
+            this.trail.push({ x: this.x, y: this.y });
+            if (this.trail.length > 8) this.trail.shift();
+
+            // Lerp delayedHealth toward current health (for the "ghost" damage bar)
+            if (this.delayedHealth > this.health) {
+                this.delayedHealth = Math.max(this.health, this.delayedHealth - 0.4);
+            } else {
+                this.delayedHealth = this.health;
+            }
+
             // Hammer cycle: moving -> pausing -> spinning -> moving ...
             // Also runs while a Dagger has transformed into a Hammer.
             const abilityType = this.transformTimer > 0 ? this.type : this.baseType;
@@ -631,7 +729,7 @@ canvas {
                     this.wWidth = this.baseWWidth;
                     this.damage = this.baseDamage;
                     this.spinSpeed = this.baseSpinSpeed;
-                    this.throwCooldown = 120;
+                    this.throwCooldown = 180;
                     // Clear copied ability state so old fields don't linger
                     this.hammerPhase = undefined;
                     this.hammerTimer = undefined;
@@ -905,14 +1003,14 @@ canvas {
                 if (!checkWeaponHit(attacker, defender)) continue;
 
                 let damageDealt = attacker.damage;
+                let critFlag = false;
 
                 // Axe: damage to balls is always 1, with hidden crit
                 if (attAb === 'Axe') {
                     damageDealt = 1;
-                    let crit = false;
                     if (Math.random() < attacker.critChance) {
                         damageDealt = attacker.critMult;
-                        crit = true;
+                        critFlag = true;
                     }
                     attacker.critChance += 0.01;
                     attacker.critMult += 2;
@@ -920,7 +1018,7 @@ canvas {
                     if (attacker.baseType === 'Dagger' && attacker.transformTimer > 0) {
                         damageDealt *= 2;
                     }
-                    if (crit) {
+                    if (critFlag) {
                         spawnParticles(defender.x, defender.y, '#ff2020');
                         spawnParticles(defender.x, defender.y, '#ffd700');
                     }
@@ -931,6 +1029,7 @@ canvas {
                 playHitSound();
                 triggerShake();
                 spawnParticles(defender.x, defender.y, defender.color);
+                spawnFloatingText(defender.x, defender.y - defender.radius, damageDealt, critFlag);
 
                 // Sword: spin speed +1 (scaled), damage +1
                 if (attAb === 'Sword') {
@@ -998,6 +1097,7 @@ canvas {
                     playHitSound();
                     triggerShake();
                     spawnParticles(hit.x, hit.y, hit.color);
+                    spawnFloatingText(hit.x, hit.y - hit.radius, throwDmg, false);
 
                     // Transform dagger: copy all features, double damage & spin, color = black
                     const owner = proj.owner;
@@ -1125,13 +1225,19 @@ canvas {
 
         if (p1Ball) {
             let p1Pct = Math.max(0, (p1Ball.health / p1Ball.maxHealth) * 100);
+            let p1DelayedPct = Math.max(0, (p1Ball.delayedHealth / p1Ball.maxHealth) * 100);
             document.getElementById('p1HealthBar').style.width = p1Pct + '%';
+            document.getElementById('p1DelayedBar').style.width = p1DelayedPct + '%';
             document.getElementById('p1Info').innerText = formatInfo(p1Ball);
+            document.getElementById('p1Status').innerText = getStatusIcons(p1Ball);
         }
         if (p2Ball) {
             let p2Pct = Math.max(0, (p2Ball.health / p2Ball.maxHealth) * 100);
+            let p2DelayedPct = Math.max(0, (p2Ball.delayedHealth / p2Ball.maxHealth) * 100);
             document.getElementById('p2HealthBar').style.width = p2Pct + '%';
+            document.getElementById('p2DelayedBar').style.width = p2DelayedPct + '%';
             document.getElementById('p2Info').innerText = formatInfo(p2Ball);
+            document.getElementById('p2Status').innerText = getStatusIcons(p2Ball);
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1143,10 +1249,17 @@ canvas {
 
         particles = particles.filter(particle => particle.alpha > 0);
 
+        floatingTexts.forEach(ft => {
+            ft.draw();
+            ft.update();
+        });
+        floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+
         if (balls.length <= 1) {
             balls.forEach(ball => {
                 ball.dx = 0;
                 ball.dy = 0;
+                ball.trail = []; // clear motion trail once the fight is over
                 ball.draw();
             });
 
