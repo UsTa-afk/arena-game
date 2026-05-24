@@ -551,13 +551,21 @@ canvas {
                         this.spinSpeed = 0;
                     } else if (this.hammerPhase === 'pausing') {
                         this.hammerPhase = 'spinning';
-                        this.hammerTimer = 15; // 0.25 sec fast spin
+                        this.hammerTimer = 35; // one full rotation over 35 frames
                         const sign = this.savedSpinSpeed >= 0 ? 1 : -1;
-                        this.spinSpeed = sign * (2 * Math.PI) / 15;
+                        this.spinSpeed = sign * (2 * Math.PI) / 35; // exactly 1 turn during spinning
+                        // hammerın radius buffı //
+                        this.preSpinWLength = this.wLength;
+                        this.preSpinWWidth = this.wWidth;
+                        this.wLength = this.preSpinWLength * 2;
+                        this.wWidth = this.preSpinWWidth * 2;
                     } else if (this.hammerPhase === 'spinning') {
                         this.hammerPhase = 'moving';
                         this.hammerTimer = 195; // 3.25 sec normal movement; cycle = 4s total
                         this.spinSpeed = this.savedSpinSpeed;
+                        // hammerın radius buffı //
+                        this.wLength = this.preSpinWLength;
+                        this.wWidth = this.preSpinWWidth;
                         if (this.savedDx === 0 && this.savedDy === 0) {
                             this.dx = Math.random() > 0.5 ? 2 : -2;
                             this.dy = Math.random() > 0.5 ? 2 : -2;
@@ -907,7 +915,11 @@ canvas {
                         crit = true;
                     }
                     attacker.critChance += 0.01;
-                    attacker.critMult += 1;
+                    attacker.critMult += 2;
+                    // Transformed dagger doubles the copied ability's damage (and crit)
+                    if (attacker.baseType === 'Dagger' && attacker.transformTimer > 0) {
+                        damageDealt *= 2;
+                    }
                     if (crit) {
                         spawnParticles(defender.x, defender.y, '#ff2020');
                         spawnParticles(defender.x, defender.y, '#ffd700');
@@ -923,8 +935,8 @@ canvas {
                 // Sword: spin speed +1 (scaled), damage +1
                 if (attAb === 'Sword') {
                     const sign = attacker.spinSpeed < 0 ? -1 : 1;
-                    attacker.spinSpeed += sign * 0.02;
-                    attacker.damage += 0.5;
+                    
+                    attacker.damage += 1;
                 }
 
                 // Spear: hitbox length +1, damage +0.5
