@@ -251,6 +251,19 @@ canvas {
         'Scythe': { color: '#e11d48', hp: 100, radius: 35, speed: 3.5, src: 'scythe.png' }
     };
 
+    // Per-phase Hammer audio
+    const hammerSounds = {
+        charge: new Audio('Hammer_Charge.mp3'), // ~2.5s, plays during charge (pausing)
+        hit:    new Audio('Hammer_Hit.mp3')     // ~1.33s, plays during the spin (spinning)
+    };
+
+    function playHammerSound(which) {
+        const src = which === 'charge' ? hammerSounds.charge : hammerSounds.hit;
+        const clone = src.cloneNode();
+        clone.volume = 0.7;
+        clone.play().catch(e => console.log(e));
+    }
+
     let player1Choice = null;
     let player2Choice = null;
 
@@ -640,18 +653,20 @@ canvas {
                 if (this.hammerTimer <= 0) {
                     if (this.hammerPhase === 'moving') {
                         this.hammerPhase = 'pausing';
-                        this.hammerTimer = 30; // 0.5 sec stationary
+                        this.hammerTimer = 150; // 2.5 sec charge — Hammer_Charge.mp3 plays
                         this.savedDx = this.dx;
                         this.savedDy = this.dy;
                         this.dx = 0;
                         this.dy = 0;
                         this.savedSpinSpeed = this.spinSpeed;
                         this.spinSpeed = 0;
+                        playHammerSound('charge');
                     } else if (this.hammerPhase === 'pausing') {
                         this.hammerPhase = 'spinning';
-                        this.hammerTimer = 35; // one full rotation over 35 frames
+                        this.hammerTimer = 80; // 1.33 sec hit, one full rotation
                         const sign = this.savedSpinSpeed >= 0 ? 1 : -1;
-                        this.spinSpeed = sign * (2 * Math.PI) / 35; // exactly 1 turn during spinning
+                        this.spinSpeed = sign * (2 * Math.PI) / 80; // exactly 1 turn during spinning
+                        this.hammerHitPlayed = false; // Hammer_Hit.mp3 only plays on actual contact
                         // hammerın radius buffı //
                         this.preSpinWLength = this.wLength;
                         this.preSpinWWidth = this.wWidth;
@@ -978,6 +993,7 @@ canvas {
                     spawnParticles((wxA + wxB) / 2, (wyA + wyB) / 2, '#ffffff');
 
                     // Hammer fast-spin clash disables opponent's weapon for 3s
+                    // (no Hammer_Hit sound — that's reserved for direct ball impacts)
                     if (abilityOf(a) === 'Hammer' && a.hammerPhase === 'spinning') {
                         b.weaponDisabledTimer = 180;
                     }
@@ -1026,7 +1042,9 @@ canvas {
 
                 defender.health -= damageDealt;
                 defender.iframes = 30;
-                playHitSound();
+                // Hammer's charged spin hit uses its own Hammer_Hit.mp3 instead of clash.mp3
+                const isHammerSpinHit = attAb === 'Hammer' && attacker.hammerPhase === 'spinning';
+                if (!isHammerSpinHit) playHitSound();
                 triggerShake();
                 spawnParticles(defender.x, defender.y, defender.color);
                 spawnFloatingText(defender.x, defender.y - defender.radius, damageDealt, critFlag);
@@ -1049,6 +1067,7 @@ canvas {
                     attacker.damage += 2;
                     defender.stunTimer = 180;
                     defender.weaponLockTimer = 180;
+                    if (!attacker.hammerHitPlayed) { playHammerSound('hit'); attacker.hammerHitPlayed = true; }
                 }
 
                 // Scythe: applies bleed (slow + DoT 5s), bleed dps +0.2 per scythe hit
@@ -1224,6 +1243,7 @@ canvas {
         if (isPaused) return;
 
         if (p1Ball) {
+            if (p1Ball.health <= 0) p1Ball.delayedHealth = 0;
             let p1Pct = Math.max(0, (p1Ball.health / p1Ball.maxHealth) * 100);
             let p1DelayedPct = Math.max(0, (p1Ball.delayedHealth / p1Ball.maxHealth) * 100);
             document.getElementById('p1HealthBar').style.width = p1Pct + '%';
@@ -1232,6 +1252,7 @@ canvas {
             document.getElementById('p1Status').innerText = getStatusIcons(p1Ball);
         }
         if (p2Ball) {
+            if (p2Ball.health <= 0) p2Ball.delayedHealth = 0;
             let p2Pct = Math.max(0, (p2Ball.health / p2Ball.maxHealth) * 100);
             let p2DelayedPct = Math.max(0, (p2Ball.delayedHealth / p2Ball.maxHealth) * 100);
             document.getElementById('p2HealthBar').style.width = p2Pct + '%';
