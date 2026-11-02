@@ -1,0 +1,274 @@
+/* ==========================================================================
+   Arena Battle - Stylesheet
+   Layout utilities come from Tailwind; this file holds the custom theme
+   (neon glows, animations) and all mobile / touch specific fixes.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Base & background
+   -------------------------------------------------------------------------- */
+html,
+body {
+    height: 100%;
+}
+
+body {
+    background-color: #051329;
+    color: white;
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh; /* dynamic viewport height: ignores mobile browser toolbars */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+
+    /* Touch / app feel: no blue tap flash, no text selection, no double-tap zoom */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+}
+
+/* Subtle cyan / orange vertical lines over the whole page */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, rgba(0, 255, 255, 0.1) 2px, transparent 2px),
+                linear-gradient(90deg, transparent calc(100% - 2px), rgba(255, 165, 0, 0.1) 2px);
+    background-size: 15% 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Blueprint style grid behind everything */
+.bg-grid {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: linear-gradient(rgba(14, 56, 122, 0.3) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(14, 56, 122, 0.3) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+img {
+    -webkit-user-drag: none; /* prevent "drag image" ghost on long press */
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   2. Typography
+   -------------------------------------------------------------------------- */
+.font-montserrat { font-family: "Montserrat", sans-serif; }
+.font-orbitron   { font-family: 'Orbitron', sans-serif; }
+
+/* --------------------------------------------------------------------------
+   3. Menu: weapon cards
+   -------------------------------------------------------------------------- */
+/* The menu can scroll on short phone screens, with its scrollbar hidden
+   so no scrollbar ever appears on the page. */
+#menu {
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;       /* Firefox */
+    -ms-overflow-style: none;    /* IE / legacy Edge */
+}
+#menu::-webkit-scrollbar {
+    display: none;               /* Chrome / Safari / Opera */
+}
+
+.glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); }
+
+/* Per-weapon neon glow around each card */
+.glow-yellow  { box-shadow: 0 0 15px rgba(234, 179, 8, 0.5),  inset 0 0 10px rgba(234, 179, 8, 0.2);  border-color: rgba(234, 179, 8, 0.8); }
+.glow-cyan    { box-shadow: 0 0 15px rgba(6, 182, 212, 0.5),  inset 0 0 10px rgba(6, 182, 212, 0.2);  border-color: rgba(6, 182, 212, 0.8); }
+.glow-orange  { box-shadow: 0 0 15px rgba(249, 115, 22, 0.5), inset 0 0 10px rgba(249, 115, 22, 0.2); border-color: rgba(249, 115, 22, 0.8); }
+.glow-purple  { box-shadow: 0 0 15px rgba(168, 85, 247, 0.5), inset 0 0 10px rgba(168, 85, 247, 0.2); border-color: rgba(168, 85, 247, 0.8); }
+.glow-emerald { box-shadow: 0 0 15px rgba(16, 185, 129, 0.5), inset 0 0 10px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.8); }
+.glow-rose    { box-shadow: 0 0 15px rgba(225, 29, 72, 0.5),  inset 0 0 10px rgba(225, 29, 72, 0.2);  border-color: rgba(225, 29, 72, 0.8); }
+
+.weapon-card {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Hover zoom only on devices with a real mouse.
+   On touch screens :hover "sticks" after a tap, which looked like a bug. */
+@media (hover: hover) and (pointer: fine) {
+    .weapon-card:hover { transform: scale(1.05); }
+}
+
+/* Tap feedback for touch screens */
+.weapon-card:active { transform: scale(0.97); }
+
+/* Selected card highlight for each player */
+.p1-selected { border-color: #00f3ff !important; box-shadow: 0 0 25px rgba(0, 243, 255, 0.8), inset 0 0 15px rgba(0, 243, 255, 0.4) !important; transform: scale(1.05); }
+.p2-selected { border-color: #ff7b00 !important; box-shadow: 0 0 25px rgba(255, 123, 0, 0.8), inset 0 0 15px rgba(255, 123, 0, 0.4) !important; transform: scale(1.05); }
+
+/* Small "P1" / "P2" badge so it is obvious who picked which card */
+.p1-selected::after,
+.p2-selected::after {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #051329;
+}
+.p1-selected::after { content: 'P1'; background: #00f3ff; }
+.p2-selected::after { content: 'P2'; background: #ff7b00; }
+
+/* --------------------------------------------------------------------------
+   4. Menu: buttons
+   -------------------------------------------------------------------------- */
+.btn-3d { box-shadow: 0 4px 0 0 rgba(21, 128, 61, 1); transition: all 0.1s ease; }
+.btn-3d:active { transform: translateY(4px); box-shadow: 0 0 0 0 rgba(21, 128, 61, 1); }
+
+/* START is disabled until both players have picked a weapon */
+#startBtn { opacity: 0.5; pointer-events: none; }
+#startBtn.ready { opacity: 1; pointer-events: all; }
+
+/* Action bar sticks to the bottom of the menu, so START stays reachable
+   even when the cards don't fit on the screen (short laptops, phones) */
+#menuActions {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 0 max(0.75rem, env(safe-area-inset-bottom));
+    background: linear-gradient(to top, #051329 70%, rgba(5, 19, 41, 0));
+    z-index: 20;
+}
+
+/* --------------------------------------------------------------------------
+   5. In-game HUD
+   -------------------------------------------------------------------------- */
+.neon-box-blue   { box-shadow: 0 0 15px #00f3ff, inset 0 0 15px #00f3ff; border: 2px solid #00f3ff; }
+.neon-box-orange { box-shadow: 0 0 15px #ff7b00, inset 0 0 15px #ff7b00; border: 2px solid #ff7b00; }
+.neon-box-purple { box-shadow: 0 0 25px #a855f7, inset 0 0 15px #a855f7; border: 2px solid #a855f7; }
+
+/* Health bar: the real bar drops fast, the white "ghost" bar follows slowly */
+#p1HealthBar, #p2HealthBar { transition: width 0.12s ease-out; }
+#p1DelayedBar, #p2DelayedBar {
+    transition: width 0.55s cubic-bezier(0.33, 1, 0.68, 1) 0.12s;
+    background-color: rgba(255, 255, 255, 0.55);
+}
+
+.status-icons { font-size: 14px; min-height: 18px; letter-spacing: 2px; }
+
+/* Game screen fills exactly one screen; the canvas area takes the leftover space */
+#gameUI {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+
+#arenaWrapper {
+    flex: 1 1 auto;
+    min-height: 0; /* allow the flex item to shrink below the canvas size */
+    width: 100%;
+}
+
+/* Canvas display size is set from JS (fitCanvas) so it always stays square
+   and fits the screen in both portrait and landscape. */
+canvas {
+    background-color: #0a1128;
+    display: block;
+    border-radius: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   6. Screen shake on hit
+   -------------------------------------------------------------------------- */
+@keyframes shake {
+    0%   { transform: translate(2px, 2px) rotate(0deg); }
+    20%  { transform: translate(-2px, -2px) rotate(-1deg); }
+    40%  { transform: translate(-3px, 0px) rotate(1deg); }
+    60%  { transform: translate(3px, 2px) rotate(0deg); }
+    80%  { transform: translate(1px, -2px) rotate(-1deg); }
+    100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+.shake { animation: shake 0.2s cubic-bezier(.36, .07, .19, .97) both; }
+
+/* --------------------------------------------------------------------------
+   7. Reset button
+   Lives inside #gameUI under the arena (normal flow), so it never overlaps
+   the health bars on any screen size and is hidden while the menu is shown.
+   -------------------------------------------------------------------------- */
+#restartBtn {
+    flex: 0 0 auto;
+    margin: 0.75rem 0 max(0.75rem, env(safe-area-inset-bottom));
+    padding: 10px 24px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 8px;
+    z-index: 60;
+    font-family: "Montserrat", sans-serif;
+    box-shadow: 0 4px 0 0 #b91c1c;
+    transition: all 0.1s ease;
+}
+#restartBtn:active { transform: translateY(4px); box-shadow: 0 0 0 0 #b91c1c; }
+
+/* --------------------------------------------------------------------------
+   8. Mobile layout
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    /* Weapon cards: compact 2-column grid. The whole menu scrolls (see #menu). */
+    #weaponGrid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+    .weapon-card {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 190px;
+        padding: 0.75rem !important;
+    }
+    .weapon-card .card-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+    .weapon-card h2 { font-size: 1rem; }
+
+    #menuActions { margin-top: 1rem !important; }
+
+    #restartBtn { font-size: 14px; }
+}
+
+/* Very short screens (phones in landscape): squeeze the HUD */
+@media (max-height: 500px) {
+    #gameUI header { margin-top: 0 !important; }
+    #gameUI .status-icons { display: none; }
+    #vsLabel { font-size: 1.5rem !important; margin-top: 0 !important; }
+
+    /* There is free space beside the square arena, so move the reset button
+       into the corner and give the arena the full height */
+    #restartBtn {
+        position: absolute;
+        right: max(12px, env(safe-area-inset-right));
+        bottom: max(12px, env(safe-area-inset-bottom));
+        margin: 0;
+        font-size: 13px;
+        padding: 8px 16px;
+    }
+    #arenaWrapper { padding-bottom: 0.5rem; }
+
+    #menuActions { padding: 0.5rem 0 max(0.5rem, env(safe-area-inset-bottom)); }
+}

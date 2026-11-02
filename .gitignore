@@ -1,0 +1,12 @@
+node_modules/
+www/
+android/
+ios/
+package.json
+package-lock.json
+capacitor.config.json
+capacitor.config.ts
+*.apk
+.DS_Store
+Thumbs.db
+
